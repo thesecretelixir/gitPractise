@@ -628,7 +628,8 @@
       return;
     }
 
-    var mobileSlides = parseInt('{{ mobile_slides }}', 10) || 2;
+    var mobileSlides  = parseInt('{{ mobile_slides }}', 10) || 2;
+    var desktopCols   = parseInt('{{ desktop_cols }}', 10) || 4;
 
     allPanels.forEach(function (panelData) {
       var panel = document.getElementById(panelData.panelId);
@@ -636,19 +637,19 @@
 
       var products = panelData.products || [];
 
-      /* ── Populate desktop grid ── */
+      /* ── Populate desktop grid (max desktopCols cards = one row) ── */
       var grid = panel.querySelector('.bst-grid');
       if (grid) {
-        products.forEach(function (p) {
+        products.slice(0, desktopCols).forEach(function (p) {
           var col = document.createElement('div');
           col.innerHTML = buildCard(p);
           grid.appendChild(col.firstChild);
         });
       }
 
-      /* ── Populate mobile swiper slides ── */
-      var swiperEl   = panel.querySelector('.bst-swiper');
-      var wrapper    = swiperEl && swiperEl.querySelector('.swiper-wrapper');
+      /* ── Populate mobile swiper (all products, swipeable) ── */
+      var swiperEl = panel.querySelector('.bst-swiper');
+      var wrapper  = swiperEl && swiperEl.querySelector('.swiper-wrapper');
       if (wrapper) {
         var slides = wrapper.querySelectorAll('.swiper-slide');
         slides.forEach(function (slide, idx) {
