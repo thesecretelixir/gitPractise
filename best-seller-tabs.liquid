@@ -50,18 +50,13 @@
           {%- if block.settings.collection -%}
             {%- assign tab_products = block.settings.collection.products | limit: products_limit -%}
 
-            <!-- Desktop Grid -->
+            <!-- Desktop Grid (cards injected by JS from JSON data below) -->
             <div
               class="bst-grid bst-grid--cols-{{ desktop_cols }}"
               aria-label="Products">
               {%- for product in tab_products -%}
-                {%- include 'bst-product-card-inline', product: product -%}
+                <div class="bst-grid-item"></div>
               {%- endfor -%}
-              {%- comment -%}
-                Shopify sections cannot render snippets inline with variable passing
-                in older syntax, so the card markup is duplicated below via capture.
-                In Online Store 2.0 you can move this to a snippet with `render`.
-              {%- endcomment -%}
             </div>
 
             <!-- Mobile Swiper -->
