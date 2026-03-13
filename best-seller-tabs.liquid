@@ -1,0 +1,813 @@
+{%- comment -%}
+  sections/best-seller-tabs.liquid
+  Best Seller section with collection tabs.
+  - Desktop: CSS Grid (4 per row by default, configurable)
+  - Mobile: Swiper horizontal carousel (2 per view by default, configurable)
+  - Product card: image + badge + wishlist + title + price + subtitle + rating + variant + add-to-cart
+  - Self-contained: no external snippet dependencies
+{%- endcomment -%}
+
+<!-- Swiper CSS -->
+<link rel="stylesheet" href="https://unpkg.com/swiper@9/swiper-bundle.min.css">
+
+{%- assign products_limit   = section.settings.products_limit -%}
+{%- assign desktop_cols     = section.settings.desktop_per_row -%}
+{%- assign mobile_slides    = section.settings.mobile_per_slide -%}
+
+<section class="bst-section" id="bst-section-{{ section.id }}">
+  <div class="bst-page-width">
+
+    <!-- ── Header ── -->
+    <div class="bst-header">
+      <div class="bst-title-wrap">
+        <h2 class="bst-title">{{ section.settings.main_title }}</h2>
+        <div class="bst-underline"></div>
+      </div>
+      <div class="bst-tab-controls" role="tablist">
+        {%- for block in section.blocks -%}
+          <button
+            class="bst-tab-btn{% if forloop.first %} active{% endif %}"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-controls="bst-panel-{{ block.id }}"
+            data-tab="bst-panel-{{ block.id }}"
+            {{ block.shopify_attributes }}>
+            {{ block.settings.tab_title }}
+          </button>
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <!-- ── Tab Panels ── -->
+    <div class="bst-panels">
+      {%- for block in section.blocks -%}
+        <div
+          id="bst-panel-{{ block.id }}"
+          class="bst-panel{% if forloop.first %} active{% endif %}"
+          role="tabpanel"
+          {{ block.shopify_attributes }}>
+
+          {%- if block.settings.collection -%}
+            {%- assign tab_products = block.settings.collection.products | limit: products_limit -%}
+
+            <!-- Desktop Grid -->
+            <div
+              class="bst-grid bst-grid--cols-{{ desktop_cols }}"
+              aria-label="Products">
+              {%- for product in tab_products -%}
+                {%- include 'bst-product-card-inline', product: product -%}
+              {%- endfor -%}
+              {%- comment -%}
+                Shopify sections cannot render snippets inline with variable passing
+                in older syntax, so the card markup is duplicated below via capture.
+                In Online Store 2.0 you can move this to a snippet with `render`.
+              {%- endcomment -%}
+            </div>
+
+            <!-- Mobile Swiper -->
+            <div class="bst-swiper swiper">
+              <div class="swiper-wrapper">
+                {%- for product in tab_products -%}
+                  <div class="swiper-slide">
+                  </div>
+                {%- endfor -%}
+              </div>
+              <div class="swiper-pagination bst-pagination"></div>
+            </div>
+
+            {%- if section.settings.show_view_all and block.settings.collection.url -%}
+              <div class="bst-viewall">
+                <a href="{{ block.settings.collection.url }}" class="bst-viewall-btn">
+                  {{ section.settings.view_all_label }}
+                </a>
+              </div>
+            {%- endif -%}
+
+          {%- else -%}
+            <p class="bst-empty">Please select a collection for this tab in the section settings.</p>
+          {%- endif -%}
+        </div>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════
+     Inline product-card renderer via JS template
+     (avoids snippet dependency, fully self-contained)
+     ══════════════════════════════════════════════ -->
+<script type="text/plain" id="bst-products-data-{{ section.id }}">
+{%- assign all_products_json = '[]' -%}
+[
+  {%- for block in section.blocks -%}
+    {%- if block.settings.collection -%}
+      {%- assign tab_products = block.settings.collection.products | limit: products_limit -%}
+      {
+        "panelId": "bst-panel-{{ block.id }}",
+        "products": [
+          {%- for product in tab_products -%}
+            {%- comment -%} Badge: first matching tag wins {%- endcomment -%}
+            {%- assign badge_text = '' -%}
+            {%- assign badge_tags = 'Summer Special,New Launch,Hot Deal,Best Seller,New Arrival,Sale,Limited Edition,Flash Sale,Trending' | split: ',' -%}
+            {%- for tag in product.tags -%}
+              {%- if badge_text == '' -%}
+                {%- for btag in badge_tags -%}
+                  {%- if tag == btag and badge_text == '' -%}
+                    {%- assign badge_text = tag -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              {%- endif -%}
+            {%- endfor -%}
+
+            {%- comment -%} Rating metafields (Shopify Product Reviews / Judge.me compatible) {%- endcomment -%}
+            {%- assign r_value = product.metafields.reviews.rating.value -%}
+            {%- assign r_count = product.metafields.reviews.rating_count.value -%}
+
+            {%- comment -%} Subtitle: custom metafield first, then truncated description {%- endcomment -%}
+            {%- assign subtitle_text = product.metafields.custom.subtitle | default: '' -%}
+            {%- if subtitle_text == '' and product.description != '' -%}
+              {%- assign subtitle_text = product.description | strip_html | truncate: 60 -%}
+            {%- endif -%}
+
+            {
+              "title":    {{ product.title | json }},
+              "url":      {{ product.url | json }},
+              "price":    {{ product.price | money | json }},
+              "subtitle": {{ subtitle_text | json }},
+              "badge":    {{ badge_text | json }},
+              "image":    {{ product.featured_image | image_url: width: 600 | json }},
+              "imageAlt": {{ product.featured_image.alt | default: product.title | escape | json }},
+              "rating":   {{ r_value | json }},
+              "reviews":  {{ r_count | json }},
+              "variants": [
+                {%- for variant in product.variants -%}
+                  {
+                    "id":        {{ variant.id }},
+                    "title":     {{ variant.title | json }},
+                    "available": {{ variant.available | json }},
+                    "price":     {{ variant.price | money | json }}
+                  }{% unless forloop.last %},{% endunless %}
+                {%- endfor -%}
+              ]
+            }{% unless forloop.last %},{% endunless %}
+          {%- endfor -%}
+        ]
+      }{% unless forloop.last %},{% endunless %}
+    {%- endif -%}
+  {%- endfor -%}
+]
+</script>
+
+<!-- ══════════════════════════════════════════════
+     Styles
+     ══════════════════════════════════════════════ -->
+<style>
+/* ── Section wrapper ── */
+.bst-section {
+  background-image: url(https://cdn.shopify.com/s/files/1/0710/9682/8098/files/20251018_1337_Pastel-Nature-Background_simple_compose_01k7v5qb78ffd8yasycbbr6mb0.webp?v=1764843133);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  padding: 52px 0;
+}
+
+.bst-page-width {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* ── Header ── */
+.bst-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.bst-title {
+  font-size: 40px;
+  color: #2e4c1d;
+  margin: 0 0 8px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.bst-underline {
+  width: 120px;
+  height: 3px;
+  background: #e2c44b;
+  border-radius: 2px;
+}
+
+/* ── Tab buttons ── */
+.bst-tab-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.bst-tab-btn {
+  background: #fff;
+  border: 1.5px solid #c8c8c8;
+  color: #555;
+  padding: 9px 22px;
+  border-radius: 30px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.bst-tab-btn:hover {
+  background: #f5f5f5;
+}
+
+.bst-tab-btn.active {
+  background: #2e4c1d;
+  color: #fff;
+  border-color: #2e4c1d;
+}
+
+/* ── Panels ── */
+.bst-panel { display: none; }
+.bst-panel.active { display: block; }
+
+/* ── Desktop Grid ── */
+.bst-grid {
+  display: grid;
+  gap: 24px;
+}
+
+.bst-grid--cols-2 { grid-template-columns: repeat(2, 1fr); }
+.bst-grid--cols-3 { grid-template-columns: repeat(3, 1fr); }
+.bst-grid--cols-4 { grid-template-columns: repeat(4, 1fr); }
+
+/* ── Mobile Swiper: hidden on desktop ── */
+.bst-swiper { display: none; }
+
+/* ── Product Card ── */
+.bst-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Image area */
+.bst-card__img-wrap {
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.bst-card__img-wrap a {
+  display: block;
+}
+
+.bst-card__img-wrap img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.35s ease;
+}
+
+.bst-card:hover .bst-card__img-wrap img {
+  transform: scale(1.04);
+}
+
+/* Badge */
+.bst-badge {
+  position: absolute;
+  top: 12px;
+  left: 0;
+  background: #e97324;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px 4px 12px;
+  border-radius: 0 20px 20px 0;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* Wishlist */
+.bst-wishlist {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,0.9);
+  border: none;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  padding: 0;
+}
+
+.bst-wishlist:hover {
+  background: #fff;
+}
+
+.bst-wishlist svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: #2e4c1d;
+  stroke-width: 1.8;
+  transition: fill 0.2s, stroke 0.2s;
+}
+
+.bst-wishlist.wishlisted svg {
+  fill: #e74c3c;
+  stroke: #e74c3c;
+}
+
+/* Card body */
+.bst-card__body {
+  padding: 14px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 6px;
+}
+
+/* Title + price row */
+.bst-card__title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bst-card__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #2e4c1d;
+  margin: 0;
+  line-height: 1.35;
+  flex: 1;
+}
+
+.bst-card__title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.bst-card__title a:hover {
+  text-decoration: underline;
+}
+
+.bst-card__price {
+  font-size: 15px;
+  font-weight: 700;
+  color: #2e4c1d;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Subtitle */
+.bst-card__subtitle {
+  font-size: 12px;
+  color: #888;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* Rating */
+.bst-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.bst-stars {
+  display: flex;
+  gap: 1px;
+}
+
+.bst-star {
+  font-size: 14px;
+  color: #ddd;
+  line-height: 1;
+}
+
+.bst-star.filled {
+  color: #f5a623;
+}
+
+.bst-rating-text {
+  font-size: 12px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Variant select */
+.bst-variant-select {
+  width: 100%;
+  padding: 9px 32px 9px 12px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #333;
+  background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23555' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  margin-top: auto;
+}
+
+.bst-variant-select:focus {
+  outline: none;
+  border-color: #2e4c1d;
+}
+
+/* Add to cart button */
+.bst-addcart-btn {
+  width: 100%;
+  background: #2e4c1d;
+  color: #fff;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  margin-top: 4px;
+}
+
+.bst-addcart-btn:hover {
+  background: #3d6528;
+}
+
+.bst-addcart-btn:active {
+  transform: scale(0.98);
+}
+
+/* View all */
+.bst-viewall {
+  text-align: center;
+  margin-top: 28px;
+}
+
+.bst-viewall-btn {
+  display: inline-block;
+  background: #e2c44b;
+  color: #2e4c1d;
+  padding: 12px 32px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.bst-viewall-btn:hover {
+  background: #d4b43a;
+  transform: translateY(-1px);
+}
+
+/* Empty state */
+.bst-empty {
+  color: #999;
+  padding: 30px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ── Swiper customisation ── */
+.bst-swiper .swiper-wrapper {
+  align-items: stretch;
+}
+
+.bst-swiper .swiper-slide {
+  height: auto;
+}
+
+.bst-pagination {
+  bottom: 0;
+}
+
+.bst-pagination .swiper-pagination-bullet {
+  background: #2e4c1d;
+  opacity: 0.3;
+}
+
+.bst-pagination .swiper-pagination-bullet-active {
+  opacity: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 767px) {
+  .bst-title { font-size: 28px; }
+
+  .bst-header {
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Hide desktop grid, show swiper */
+  .bst-grid { display: none; }
+  .bst-swiper { display: block; padding-bottom: 32px; }
+
+  .bst-card__img-wrap img { height: 180px; }
+}
+
+@media (max-width: 480px) {
+  .bst-tab-controls { gap: 8px; }
+  .bst-tab-btn { padding: 7px 16px; font-size: 13px; }
+}
+</style>
+
+<!-- ══════════════════════════════════════════════
+     Swiper JS
+     ══════════════════════════════════════════════ -->
+<script src="https://unpkg.com/swiper@9/swiper-bundle.min.js"></script>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Helpers ── */
+  function esc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function heartIcon() {
+    return '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>';
+  }
+
+  function starsHtml(ratingValue) {
+    if (!ratingValue) return '';
+    var filled = Math.round(parseFloat(ratingValue));
+    var html = '<div class="bst-stars" aria-label="Rated ' + esc(ratingValue) + ' out of 5">';
+    for (var i = 1; i <= 5; i++) {
+      html += '<span class="bst-star' + (i <= filled ? ' filled' : '') + '">&#9733;</span>';
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function buildCard(p) {
+    var variantOptions = '';
+    if (p.variants && p.variants.length > 1) {
+      variantOptions = '<select class="bst-variant-select" name="id" aria-label="Select variant">';
+      p.variants.forEach(function (v) {
+        variantOptions += '<option value="' + v.id + '"' + (v.available ? '' : ' disabled') + '>' + esc(v.title) + '</option>';
+      });
+      variantOptions += '</select>';
+    } else if (p.variants && p.variants.length === 1) {
+      variantOptions = '<input type="hidden" name="id" value="' + p.variants[0].id + '">';
+    }
+
+    var badge = p.badge
+      ? '<span class="bst-badge">' + esc(p.badge) + '</span>'
+      : '';
+
+    var ratingHtml = '';
+    if (p.rating) {
+      ratingHtml = '<div class="bst-card__rating">'
+        + starsHtml(p.rating)
+        + '<span class="bst-rating-text">' + esc(p.rating) + (p.reviews ? ' | ' + esc(p.reviews) + ' Reviews' : '') + '</span>'
+        + '</div>';
+    }
+
+    var subtitleHtml = p.subtitle
+      ? '<p class="bst-card__subtitle">' + esc(p.subtitle) + '</p>'
+      : '';
+
+    return '<div class="bst-card">'
+      + '<div class="bst-card__img-wrap">'
+      +   '<a href="' + esc(p.url) + '" tabindex="-1" aria-hidden="true">'
+      +     '<img src="' + esc(p.image) + '" alt="' + esc(p.imageAlt) + '" loading="lazy" width="400" height="220">'
+      +   '</a>'
+      +   badge
+      +   '<button class="bst-wishlist" type="button" aria-label="Add ' + esc(p.title) + ' to wishlist">' + heartIcon() + '</button>'
+      + '</div>'
+      + '<div class="bst-card__body">'
+      +   '<div class="bst-card__title-row">'
+      +     '<h3 class="bst-card__title"><a href="' + esc(p.url) + '">' + esc(p.title) + '</a></h3>'
+      +     '<div class="bst-card__price">' + esc(p.price) + '</div>'
+      +   '</div>'
+      +   subtitleHtml
+      +   ratingHtml
+      +   '<form method="post" action="/cart/add" class="bst-card__form">'
+      +     variantOptions
+      +     '<button type="submit" class="bst-addcart-btn">ADD TO CART</button>'
+      +   '</form>'
+      + '</div>'
+      + '</div>';
+  }
+
+  /* ── Init ── */
+  document.addEventListener('DOMContentLoaded', function () {
+    var sectionId = '{{ section.id }}';
+    var dataEl    = document.getElementById('bst-products-data-' + sectionId);
+    if (!dataEl) return;
+
+    var allPanels;
+    try {
+      allPanels = JSON.parse(dataEl.textContent.trim());
+    } catch (e) {
+      console.error('[best-seller-tabs] Failed to parse product data', e);
+      return;
+    }
+
+    var mobileSlides = parseInt('{{ mobile_slides }}', 10) || 2;
+
+    allPanels.forEach(function (panelData) {
+      var panel = document.getElementById(panelData.panelId);
+      if (!panel) return;
+
+      var products = panelData.products || [];
+
+      /* ── Populate desktop grid ── */
+      var grid = panel.querySelector('.bst-grid');
+      if (grid) {
+        products.forEach(function (p) {
+          var col = document.createElement('div');
+          col.innerHTML = buildCard(p);
+          grid.appendChild(col.firstChild);
+        });
+      }
+
+      /* ── Populate mobile swiper slides ── */
+      var swiperEl   = panel.querySelector('.bst-swiper');
+      var wrapper    = swiperEl && swiperEl.querySelector('.swiper-wrapper');
+      if (wrapper) {
+        var slides = wrapper.querySelectorAll('.swiper-slide');
+        slides.forEach(function (slide, idx) {
+          if (products[idx]) {
+            slide.innerHTML = buildCard(products[idx]);
+          }
+        });
+      }
+
+      /* ── Init Swiper (mobile only via breakpoint) ── */
+      if (swiperEl) {
+        new Swiper(swiperEl, {
+          slidesPerView: mobileSlides,
+          spaceBetween: 14,
+          loop: false,
+          speed: 400,
+          grabCursor: true,
+          pagination: {
+            el: swiperEl.querySelector('.swiper-pagination'),
+            clickable: true
+          },
+          breakpoints: {
+            768: {
+              /* On desktop, Swiper is hidden via CSS so these values
+                 are irrelevant, but set them to a safe state anyway. */
+              slidesPerView: 4,
+              spaceBetween: 24,
+              allowTouchMove: false
+            }
+          }
+        });
+      }
+    });
+
+    /* ── Tab switching ── */
+    document.querySelectorAll('#bst-section-' + sectionId + ' .bst-tab-btn')
+      .forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var targetId = this.getAttribute('data-tab');
+
+          document.querySelectorAll('#bst-section-' + sectionId + ' .bst-tab-btn')
+            .forEach(function (b) {
+              b.classList.remove('active');
+              b.setAttribute('aria-selected', 'false');
+            });
+          document.querySelectorAll('#bst-section-' + sectionId + ' .bst-panel')
+            .forEach(function (p) { p.classList.remove('active'); });
+
+          this.classList.add('active');
+          this.setAttribute('aria-selected', 'true');
+
+          var target = document.getElementById(targetId);
+          if (target) target.classList.add('active');
+        });
+      });
+
+    /* ── Wishlist toggle (UI only – wire to your wishlist app as needed) ── */
+    document.querySelectorAll('#bst-section-' + sectionId + ' .bst-wishlist')
+      .forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          this.classList.toggle('wishlisted');
+        });
+      });
+  });
+}());
+</script>
+
+{% schema %}
+{
+  "name": "Best Seller Tabs",
+  "settings": [
+    {
+      "type": "text",
+      "id": "main_title",
+      "label": "Section title",
+      "default": "Best Seller"
+    },
+    {
+      "type": "range",
+      "id": "products_limit",
+      "label": "Number of products to load",
+      "min": 2,
+      "max": 16,
+      "step": 1,
+      "default": 8,
+      "info": "Total products fetched per tab. On desktop all are shown in the grid; on mobile users swipe through them."
+    },
+    {
+      "type": "select",
+      "id": "desktop_per_row",
+      "label": "Desktop: products per row",
+      "options": [
+        { "value": "2", "label": "2 per row" },
+        { "value": "3", "label": "3 per row" },
+        { "value": "4", "label": "4 per row (default)" }
+      ],
+      "default": "4"
+    },
+    {
+      "type": "select",
+      "id": "mobile_per_slide",
+      "label": "Mobile: products visible at once",
+      "options": [
+        { "value": "1", "label": "1 product" },
+        { "value": "2", "label": "2 products (default)" }
+      ],
+      "default": "2"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "Show 'View All' button",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "view_all_label",
+      "label": "'View All' button label",
+      "default": "View All Products"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Collection Tab",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tab_title",
+          "label": "Tab label",
+          "default": "Trending"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Best Seller Tabs",
+      "category": "Collections",
+      "blocks": [
+        { "type": "tab", "settings": { "tab_title": "Trending" } },
+        { "type": "tab", "settings": { "tab_title": "Hot Deals" } },
+        { "type": "tab", "settings": { "tab_title": "New Arrivals" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
