@@ -1,0 +1,367 @@
+<section class="certifications-section">
+  <div class="container">
+    {% if section.settings.heading != blank %}
+      <h2 class="section-title">{{ section.settings.heading }}</h2>
+    {% endif %}
+
+    <!-- Desktop Grid -->
+    <div class="certifications-grid desktop-view">
+      {% for block in section.blocks %}
+        <div class="certification-item">
+          {% if block.settings.icon_image != blank %}
+            <div class="certification-img">
+              <img src="{{ block.settings.icon_image | img_url: '200x' }}" alt="{{ block.settings.certification_name }}">
+            </div>
+          {% else %}
+            <div class="certification-logo">
+              <i class="{{ block.settings.icon_class }}"></i>
+            </div>
+          {% endif %}
+          <div class="certification-name">{{ block.settings.certification_name }}</div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <!-- Mobile Slider (infinite continuous auto-slide, one item at a time) -->
+    <div class="mobile-certification-slider mobile-view">
+      <div class="slider-track-wrapper">
+        <div class="slider-track">
+          {% for block in section.blocks %}
+            <div class="certification-item">
+              {% if block.settings.icon_image != blank %}
+                <div class="certification-img">
+                  <img src="{{ block.settings.icon_image | img_url: '200x' }}" alt="{{ block.settings.certification_name }}">
+                </div>
+              {% else %}
+                <div class="certification-logo">
+                  <i class="{{ block.settings.icon_class }}"></i>
+                </div>
+              {% endif %}
+              <div class="certification-name">{{ block.settings.certification_name }}</div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="dots"></div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .section-title {
+    text-align: center;
+    color: #2d5016;
+    position: relative;
+    font-size: 2.8rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 50px;
+    font-weight: 700;
+  }
+  .section-title::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 4px;
+    background-color: #d4af37;
+    border-radius: 2px;
+  }
+  .certifications-section {
+    padding: 100px 0;
+    background-color: #f9f7f2;
+    text-align: center;
+  }
+  .certifications-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 35px;
+    justify-items: center;
+    align-items: center;
+  }
+  .container {
+    width: 100%;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+  .certification-item {
+    text-align: center;
+    padding: 25px;
+    background: white;
+    border-radius: 14px;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: .3s ease;
+    box-shadow: 0px 4px 18px rgba(0,0,0,0.08);
+    flex-shrink: 0;
+  }
+  .certification-item:hover {
+    transform: translateY(-5px);
+  }
+  .certification-img img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    margin-bottom: 15px;
+  }
+  .certification-logo {
+    font-size: 2.8rem;
+    color: var(--primary-dark);
+    margin-bottom: 15px;
+  }
+  .certification-name {
+    font-weight: 600;
+    font-size: .9rem;
+    color: var(--primary-dark);
+  }
+
+  /* Mobile Slider */
+  .mobile-certification-slider {
+    overflow: hidden;
+    width: 100%;
+    display: none;
+  }
+  .slider-track-wrapper {
+    overflow: hidden;
+    width: 100%;
+  }
+  .slider-track {
+    display: flex;
+    gap: 0;
+    will-change: transform;
+    /* transition is applied via JS for smooth continuous loop */
+  }
+  /* Each slide takes full container width on mobile */
+  .mobile-certification-slider .certification-item {
+    min-width: 100%;
+    width: 100%;
+    height: 180px;
+    box-sizing: border-box;
+  }
+  .mobile-certification-slider .dots {
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+    gap: 10px;
+  }
+  .dots span {
+    width: 10px;
+    height: 10px;
+    background: #bdbdbd;
+    display: inline-block;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .dots .active {
+    background: var(--primary-dark, #2d5016);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .desktop-view { display: none; }
+    .mobile-view { display: block; }
+  }
+  @media (min-width: 769px) {
+    .mobile-view { display: none; }
+  }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const mobileSlider = document.querySelector(".mobile-certification-slider");
+  if (!mobileSlider) return;
+
+  // Only run on mobile
+  if (window.innerWidth > 768) return;
+
+  const track = mobileSlider.querySelector(".slider-track");
+  const originalItems = Array.from(track.querySelectorAll(".certification-item"));
+  const totalOriginal = originalItems.length;
+
+  if (totalOriginal === 0) return;
+
+  const dotsContainer = mobileSlider.querySelector(".dots");
+
+  // --- Infinite loop setup ---
+  // Clone all items: append clones at end, prepend clones at start
+  // This allows seamless looping in both directions.
+  const clonesBefore = originalItems.map(item => item.cloneNode(true));
+  const clonesAfter  = originalItems.map(item => item.cloneNode(true));
+
+  // Prepend clones (reverse order so last item is right before index 0)
+  clonesBefore.reverse().forEach(clone => track.insertBefore(clone, track.firstChild));
+  // Append clones
+  clonesAfter.forEach(clone => track.appendChild(clone));
+
+  // All slides: [clonesBefore(reversed)] [originals] [clonesAfter]
+  // Real slides start at index = totalOriginal
+  let currentIndex = totalOriginal; // start at first real slide
+  let autoSlideTimer = null;
+  const SLIDE_DURATION = 400;  // ms for CSS transition
+  const AUTO_INTERVAL  = 2500; // ms between auto slides
+
+  // Build dots for real slides only
+  dotsContainer.innerHTML = "";
+  for (let i = 0; i < totalOriginal; i++) {
+    const dot = document.createElement("span");
+    if (i === 0) dot.classList.add("active");
+    dotsContainer.appendChild(dot);
+    dot.addEventListener("click", () => goToSlide(i));
+  }
+
+  function getItemWidth() {
+    return track.querySelector(".certification-item").getBoundingClientRect().width;
+  }
+
+  function setTransition(enabled) {
+    track.style.transition = enabled
+      ? `transform ${SLIDE_DURATION}ms ease`
+      : "none";
+  }
+
+  function applyTransform() {
+    const itemWidth = getItemWidth();
+    track.style.transform = `translateX(-${currentIndex * itemWidth}px)`;
+  }
+
+  // Jump instantly (no transition) to a position — used for infinite reset
+  function jumpTo(index) {
+    setTransition(false);
+    currentIndex = index;
+    applyTransform();
+    // Force reflow so the browser registers the jump before re-enabling transition
+    track.getBoundingClientRect();
+    setTransition(true);
+  }
+
+  function updateDots() {
+    // Map currentIndex back to real dot index
+    const realIndex = ((currentIndex - totalOriginal) % totalOriginal + totalOriginal) % totalOriginal;
+    dotsContainer.querySelectorAll("span").forEach((dot, idx) =>
+      dot.classList.toggle("active", idx === realIndex)
+    );
+  }
+
+  function slideTo(index, withTransition = true) {
+    setTransition(withTransition);
+    currentIndex = index;
+    applyTransform();
+    updateDots();
+  }
+
+  function goToSlide(realIdx) {
+    slideTo(totalOriginal + realIdx);
+  }
+
+  function next() {
+    slideTo(currentIndex + 1);
+  }
+
+  // After each slide transition ends, check if we need to silently jump
+  track.addEventListener("transitionend", function () {
+    const allSlides = track.querySelectorAll(".certification-item");
+    const totalSlides = allSlides.length; // totalOriginal * 3
+
+    if (currentIndex >= totalOriginal * 2) {
+      // Slid into the "after" clone zone — jump back to real start
+      jumpTo(currentIndex - totalOriginal);
+    } else if (currentIndex < totalOriginal) {
+      // Slid into the "before" clone zone — jump to real end
+      jumpTo(currentIndex + totalOriginal);
+    }
+  });
+
+  function startAutoSlide() {
+    stopAutoSlide();
+    autoSlideTimer = setInterval(next, AUTO_INTERVAL);
+  }
+
+  function stopAutoSlide() {
+    if (autoSlideTimer) {
+      clearInterval(autoSlideTimer);
+      autoSlideTimer = null;
+    }
+  }
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  mobileSlider.addEventListener("touchstart", function (e) {
+    touchStartX = e.changedTouches[0].clientX;
+    stopAutoSlide();
+  }, { passive: true });
+
+  mobileSlider.addEventListener("touchend", function (e) {
+    touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX - touchEndX;
+    if (Math.abs(diff) > 40) {
+      if (diff > 0) {
+        slideTo(currentIndex + 1); // swipe left → next
+      } else {
+        slideTo(currentIndex - 1); // swipe right → prev
+      }
+    }
+    startAutoSlide();
+  }, { passive: true });
+
+  // Init: set position without transition, then enable
+  setTransition(false);
+  applyTransform();
+  track.getBoundingClientRect();
+  setTransition(true);
+
+  startAutoSlide();
+});
+</script>
+
+{% schema %}
+{
+  "name": "Certifications Grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Organic Certifications"
+    }
+  ],
+  "blocks": [
+    {
+      "name": "Certification",
+      "type": "cert",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon Image"
+        },
+        {
+          "type": "text",
+          "id": "icon_class",
+          "label": "FA Icon Class (optional)",
+          "default": "fas fa-leaf"
+        },
+        {
+          "type": "text",
+          "id": "certification_name",
+          "label": "Certification Name",
+          "default": "Certification Name"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Organic Certifications"
+    }
+  ]
+}
+{% endschema %}
