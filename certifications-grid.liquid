@@ -137,12 +137,13 @@
     will-change: transform;
     /* transition is applied via JS for smooth continuous loop */
   }
-  /* Each slide takes full container width on mobile */
+  /* Each slide takes 50% of container width — 2 columns visible on mobile */
   .mobile-certification-slider .certification-item {
-    min-width: 100%;
-    width: 100%;
+    min-width: calc(50% - 8px);
+    width: calc(50% - 8px);
     height: 180px;
     box-sizing: border-box;
+    margin: 0 4px;
   }
   .mobile-certification-slider .dots {
     display: flex;
@@ -207,13 +208,15 @@ document.addEventListener("DOMContentLoaded", function () {
   const SLIDE_DURATION = 400;  // ms for CSS transition
   const AUTO_INTERVAL  = 2500; // ms between auto slides
 
-  // Build dots for real slides only
+  // Build dots: one dot per pair (2 columns visible at a time)
+  const COLS = 2;
+  const totalDots = Math.ceil(totalOriginal / COLS);
   dotsContainer.innerHTML = "";
-  for (let i = 0; i < totalOriginal; i++) {
+  for (let i = 0; i < totalDots; i++) {
     const dot = document.createElement("span");
     if (i === 0) dot.classList.add("active");
     dotsContainer.appendChild(dot);
-    dot.addEventListener("click", () => goToSlide(i));
+    dot.addEventListener("click", () => goToSlide(i * COLS));
   }
 
   function getItemWidth() {
@@ -242,10 +245,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function updateDots() {
-    // Map currentIndex back to real dot index
-    const realIndex = ((currentIndex - totalOriginal) % totalOriginal + totalOriginal) % totalOriginal;
+    // Map currentIndex back to real item index, then to dot group
+    const realItemIndex = ((currentIndex - totalOriginal) % totalOriginal + totalOriginal) % totalOriginal;
+    const dotIndex = Math.floor(realItemIndex / COLS);
     dotsContainer.querySelectorAll("span").forEach((dot, idx) =>
-      dot.classList.toggle("active", idx === realIndex)
+      dot.classList.toggle("active", idx === dotIndex)
     );
   }
 
