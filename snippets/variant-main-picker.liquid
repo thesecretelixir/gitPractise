@@ -102,7 +102,7 @@ endif
   BUTTONS style — rendered as price cards
   =====================================================================
 {%- endcomment -%}
-{%- elsif block_settings.variant_style == 'buttons' -%}
+{%- elsif block_settings.variant_style == 'buttons' or block_settings.variant_style == 'pills' -%}
 {%- assign fieldset_index = forloop.index0 -%}
 <fieldset
   class="variant-option variant-option--cards"
