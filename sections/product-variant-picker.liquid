@@ -5,11 +5,7 @@
   endif
 -%}
 
-{{ 'variant-picker.css' | asset_url | stylesheet_tag }}
-
 {% render 'variant-main-picker', product_resource: product_resource %}
-
-<script src="{{ 'variant-picker.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
@@ -36,9 +32,13 @@
         {
           "value": "buttons",
           "label": "t:options.buttons"
+        },
+        {
+          "value": "cards",
+          "label": "Cards (with price)"
         }
       ],
-      "default": "buttons"
+      "default": "cards"
     },
     {
       "type": "checkbox",
