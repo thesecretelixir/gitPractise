@@ -53,30 +53,75 @@ endif
 
 {%- comment -%}
   =====================================================================
-  CARDS STYLE — each variant is a card showing price, compare-at, discount %, per-unit price
+  SWATCH style — unchanged from original theme code
   =====================================================================
 {%- endcomment -%}
-{%- if variant_style == 'cards' -%}
+{%- if variant_style == 'swatch' -%}
+{%- assign fieldset_index = forloop.index0 -%}
+<fieldset
+class="variant-option variant-option--buttons variant-option--swatches"
+data-fieldset-index="{{ fieldset_index }}"
+ref="fieldsets[]"
+>
+<legend>
+{{ product_option.name | escape -}}
+<span class="variant-option__swatch-value">{{ product_option.selected_value }}</span>
+</legend>
+{%- for product_option_value in product_option.values -%}
+<label class="variant-option__button-label variant-option__button-label--has-swatch">
+<input
+type="radio"
+name="{{ product_option.name | escape }}-{{ block.id }}-{{ product_resource.id }}"
+value="{{ product_option_value | escape }}"
+aria-label="{{ product_option_value.name }}"
+{% if product_option_value.available == false %}aria-disabled="true"{% endif %}
+data-previous-checked="false"
+data-fieldset-index="{{ fieldset_index }}"
+data-input-index="{{ forloop.index0 }}"
+data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
+data-option-value-id="{{ product_option_value.id }}"
+data-option-available="{{ product_option_value.available }}"
+data-connected-product-url="{{ product_option_value.product_url }}"
+{% if product_option_value.variant.id %}data-variant-id="{{ product_option_value.variant.id }}"{% endif %}
+{% if product_option_value.selected %}data-current-checked="true" checked{% else %}data-current-checked="false"{% endif %}
+>
+{% liquid
+assign featured_media = product_option_value.variant.featured_media
+if featured_media == blank and product_option_value.product_url
+assign featured_media = product_option_value.variant.product.featured_media
+endif
+%}
+{% render 'swatch', swatch: product_option_value.swatch, variant_image: featured_media, mode: 'unscaled' %}
+{% render 'strikethrough-variant', product_option: product_option_value %}
+</label>
+{%- endfor -%}
+</fieldset>
+
+{%- comment -%}
+  =====================================================================
+  BUTTONS style — rendered as price cards
+  =====================================================================
+{%- endcomment -%}
+{%- elsif block_settings.variant_style == 'buttons' -%}
 {%- assign fieldset_index = forloop.index0 -%}
 <fieldset
   class="variant-option variant-option--cards"
   data-fieldset-index="{{ fieldset_index }}"
   ref="fieldsets[]"
+  {{ option_id_attribute }}
 >
   <legend class="variant-option__cards-legend">{{ product_option.name | escape }}</legend>
-
   <div class="variant-option__cards-grid">
   {%- for product_option_value in product_option.values -%}
     {%- liquid
       assign ov_variant = product_option_value.variant
-      assign has_compare  = false
+      assign has_compare = false
       assign discount_pct = 0
       if ov_variant.compare_at_price > ov_variant.price
         assign has_compare  = true
         assign savings      = ov_variant.compare_at_price | minus: ov_variant.price
         assign discount_pct = savings | times: 100.0 | divided_by: ov_variant.compare_at_price | round
       endif
-
       assign per_unit_label = ''
       if ov_variant.unit_price_measurement
         assign ref_unit = ov_variant.unit_price_measurement.reference_unit
@@ -91,20 +136,19 @@ endif
       elsif product_option_value.metafields.custom.per_unit_price != blank
         assign per_unit_label = product_option_value.metafields.custom.per_unit_price | metafield_tag
       endif
+      if product_option_value.size > longest_value and option_id_attribute
+        assign longest_value = product_option_value.size
+      endif
     -%}
-
     <label
       class="variant-option__card-label{% if product_option_value.available == false %} variant-option__card-label--sold-out{% endif %}"
     >
-      {%- comment -%} Hidden radio — keeps the theme's variant-picker JS fully working {%- endcomment -%}
       <input
         type="radio"
         name="{{ product_option.name | escape }}-{{ block.id }}-{{ product_resource.id }}"
         value="{{ product_option_value | escape }}"
         aria-label="{{ product_option_value.name }}"
-        {% if product_option_value.available == false %}
-          aria-disabled="true"
-        {% endif %}
+        {% if product_option_value.available == false %}aria-disabled="true"{% endif %}
         data-previous-checked="false"
         data-fieldset-index="{{ fieldset_index }}"
         data-input-index="{{ forloop.index0 }}"
@@ -112,23 +156,14 @@ endif
         data-option-value-id="{{ product_option_value.id }}"
         data-option-available="{{ product_option_value.available }}"
         data-connected-product-url="{{ product_option_value.product_url }}"
-        {% if product_option_value.variant.id %}
-          data-variant-id="{{ product_option_value.variant.id }}"
-        {% endif %}
-        {% if product_option_value.selected %}
-          data-current-checked="true"
-          checked
-        {% else %}
-          data-current-checked="false"
-        {% endif %}
+        {% if product_option_value.variant.id %}data-variant-id="{{ product_option_value.variant.id }}"{% endif %}
+        {% if product_option_value.selected %}data-current-checked="true" checked{% else %}data-current-checked="false"{% endif %}
       >
 
-      {%- comment -%} Card content {%- endcomment -%}
       <span class="variant-card__name">{{ product_option_value | escape }}</span>
 
       <span class="variant-card__price-row">
         <span class="variant-card__price">{{ ov_variant.price | money_without_trailing_zeros }}</span>
-
         {%- if has_compare -%}
           <span class="variant-card__compare">
             <s>{{ ov_variant.compare_at_price | money_without_trailing_zeros }}</s>
@@ -147,87 +182,11 @@ endif
     </label>
   {%- endfor -%}
   </div>
-</fieldset>
-
-{%- comment -%}
-  =====================================================================
-  SWATCH / BUTTONS style — unchanged from original theme code
-  =====================================================================
-{%- endcomment -%}
-{%- elsif variant_style == 'swatch' or block_settings.variant_style == 'buttons' -%}
-{%- assign fieldset_index = forloop.index0 -%}
-<fieldset
-class="variant-option variant-option--buttons{% if variant_style == 'swatch' %} variant-option--swatches{% else %} variant-option--{{ settings.variant_button_width }}{% endif %}"
-data-fieldset-index="{{ fieldset_index }}"
-ref="fieldsets[]"
-{{ option_id_attribute }}
->
-<legend>
-{{ product_option.name | escape -}}
-{%- if variant_style == 'swatch' -%}
-<span class="variant-option__swatch-value">{{ product_option.selected_value }}</span>
-{%- endif %}
-</legend>
-{%- for product_option_value in product_option.values -%}
-{% if product_option_value.size > longest_value and option_id_attribute %}
-{% assign longest_value = product_option_value.size %}
-{% endif %}
-<label
-class="variant-option__button-label{% if variant_style == 'swatch' %} variant-option__button-label--has-swatch{% endif %}"
->
-<input
-type="radio"
-name="{{ product_option.name | escape }}-{{ block.id }}-{{ product_resource.id }}"
-value="{{ product_option_value | escape }}"
-aria-label="{{ product_option_value.name }}"
-{% if product_option_value.available == false %}
-aria-disabled="true"
-{% endif %}
-data-previous-checked="false"
-data-fieldset-index="{{ fieldset_index }}"
-data-input-index="{{ forloop.index0 }}"
-data-input-id="{{ product_option.position }}-{{ forloop.index0 }}"
-data-option-value-id="{{ product_option_value.id }}"
-data-option-available="{{ product_option_value.available }}"
-data-connected-product-url="{{ product_option_value.product_url }}"
-{% if product_option_value.variant.id %}
-data-variant-id="{{ product_option_value.variant.id }}"
-{% endif %}
-{% if product_option_value.selected %}
-data-current-checked="true"
-checked
-{% else %}
-data-current-checked="false"
-{% endif %}
->
-{% if variant_style == 'swatch' %}
-{% liquid
-assign featured_media = product_option_value.variant.featured_media
-if featured_media == blank and product_option_value.product_url
-assign featured_media = product_option_value.variant.product.featured_media
-endif
-%}
-{% render 'swatch',
-swatch: product_option_value.swatch,
-variant_image: featured_media,
-mode: 'unscaled'
-%}
-{% else %}
-{% if product_option_value.available == true %}
-<span class="variant-option__button-label__pill"></span>
-{% endif %}
-<span class="variant-option__button-label__text">{{ product_option_value | escape }}</span>
-{% endif %}
-{% render 'strikethrough-variant', product_option: product_option_value %}
-</label>
-{%- endfor -%}
-{% if option_id_attribute %}
-{% style %}
-[data-option-id="{{ fieldset_id }}"] {
---variant-ch: {{ longest_value }}ch;
-}
-{% endstyle %}
-{% endif %}
+  {%- if option_id_attribute -%}
+    {% style %}
+      [data-option-id="{{ fieldset_id }}"] { --variant-ch: {{ longest_value }}ch; }
+    {% endstyle %}
+  {%- endif -%}
 </fieldset>
 
 {%- comment -%}
