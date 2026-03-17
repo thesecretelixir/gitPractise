@@ -1,0 +1,146 @@
+{% comment %}
+  Renders a card-style variant picker.
+  Shows: variant title, current price, compare-at price (strikethrough),
+  discount %, and per-unit price (from unit_price_measurement or metafield).
+
+  Usage:
+    {% render 'variant-main-picker', product_resource: product %}
+{% endcomment %}
+
+{%- liquid
+  assign product = product_resource
+  assign current_variant = product.selected_or_first_available_variant
+  assign section_style    = section.settings.variant_style | default: 'buttons'
+  assign show_per_unit    = section.settings.show_per_unit_price | default: true
+  assign alignment        = section.settings.alignment | default: 'left'
+-%}
+
+{%- if product == blank -%}
+  <p class="variant-picker__empty">No product found.</p>
+{%- else -%}
+
+<div
+  class="variant-picker variant-picker--{{ section_style }} variant-picker--align-{{ alignment }}"
+  data-section-id="{{ section.id }}"
+  data-product-id="{{ product.id }}"
+  data-product-url="{{ product.url }}"
+>
+
+  {%- comment -%} ---- Label ---- {%- endcomment -%}
+  <p class="variant-picker__label">Select Variant</p>
+
+  {%- comment -%} ---- Variant cards (buttons style) ---- {%- endcomment -%}
+  {%- if section_style == 'buttons' -%}
+
+    <div class="variant-picker__cards" role="radiogroup" aria-label="Select a variant">
+      {%- for variant in product.variants -%}
+
+        {%- liquid
+          assign is_selected  = false
+          if variant.id == current_variant.id
+            assign is_selected = true
+          endif
+
+          assign has_compare   = false
+          assign discount_pct  = 0
+          if variant.compare_at_price > variant.price
+            assign has_compare  = true
+            assign savings      = variant.compare_at_price | minus: variant.price
+            assign discount_pct = savings | times: 100.0 | divided_by: variant.compare_at_price | round
+          endif
+
+          assign per_unit_label = ''
+          if variant.unit_price_measurement
+            assign per_unit_label = variant.unit_price | money_without_trailing_zeros
+            assign per_unit_label = per_unit_label | append: '/'
+            if variant.unit_price_measurement.reference_unit == 'ml' or variant.unit_price_measurement.reference_unit == 'l'
+              assign per_unit_label = per_unit_label | append: 'L'
+            elsif variant.unit_price_measurement.reference_unit == 'g' or variant.unit_price_measurement.reference_unit == 'kg'
+              assign per_unit_label = per_unit_label | append: 'kg'
+            else
+              assign per_unit_label = per_unit_label | append: variant.unit_price_measurement.reference_unit
+            endif
+          elsif variant.metafields.custom.per_unit_price != blank
+            assign per_unit_label = variant.metafields.custom.per_unit_price | metafield_tag
+          endif
+        -%}
+
+        <button
+          type="button"
+          class="variant-card{% if is_selected %} variant-card--selected{% endif %}{% unless variant.available %} variant-card--sold-out{% endunless %}"
+          data-variant-id="{{ variant.id }}"
+          data-variant-price="{{ variant.price }}"
+          data-variant-compare-price="{{ variant.compare_at_price | default: 0 }}"
+          data-variant-available="{{ variant.available }}"
+          aria-pressed="{{ is_selected }}"
+          aria-label="{{ variant.title }}{% unless variant.available %} - Sold out{% endunless %}"
+          {% if is_selected %}aria-current="true"{% endif %}
+        >
+          {%- comment -%} Variant name row {%- endcomment -%}
+          <span class="variant-card__title">{{ variant.title }}</span>
+
+          {%- comment -%} Price row {%- endcomment -%}
+          <span class="variant-card__prices">
+            <span class="variant-card__price">{{ variant.price | money_without_trailing_zeros }}</span>
+
+            {%- if has_compare -%}
+              <span class="variant-card__compare">
+                <s>{{ variant.compare_at_price | money_without_trailing_zeros }}</s>
+                <span class="variant-card__discount">{{ discount_pct }}% off</span>
+              </span>
+            {%- endif -%}
+          </span>
+
+          {%- comment -%} Per-unit price row {%- endcomment -%}
+          {%- if show_per_unit and per_unit_label != '' -%}
+            <span class="variant-card__per-unit">{{ per_unit_label }}</span>
+          {%- endif -%}
+
+          {%- unless variant.available -%}
+            <span class="variant-card__sold-out-badge">Sold out</span>
+          {%- endunless -%}
+        </button>
+
+      {%- endfor -%}
+    </div><!-- /.variant-picker__cards -->
+
+  {%- comment -%} ---- Dropdowns style ---- {%- endcomment -%}
+  {%- else -%}
+
+    {%- for option in product.options_with_values -%}
+      <div class="variant-picker__dropdown-wrap">
+        <label class="variant-picker__dropdown-label" for="Option-{{ section.id }}-{{ forloop.index0 }}">
+          {{ option.name }}
+        </label>
+        <select
+          id="Option-{{ section.id }}-{{ forloop.index0 }}"
+          class="variant-picker__dropdown"
+          name="options[{{ option.name | escape }}]"
+          data-option-index="{{ forloop.index0 }}"
+        >
+          {%- for value in option.values -%}
+            <option
+              value="{{ value | escape }}"
+              {% if option.selected_value == value %}selected="selected"{% endif %}
+            >
+              {{ value }}
+            </option>
+          {%- endfor -%}
+        </select>
+      </div>
+    {%- endfor -%}
+
+  {%- endif -%}
+
+  {%- comment -%} Hidden input that forms / ATC buttons read {%- endcomment -%}
+  <input
+    type="hidden"
+    name="id"
+    class="variant-picker__selected-id"
+    value="{{ current_variant.id }}"
+    data-section-id="{{ section.id }}"
+  >
+
+</div><!-- /.variant-picker -->
+
+{%- endif -%}

@@ -1,0 +1,202 @@
+/* ============================================================
+   Variant Picker — Card Style
+   Matches the UI in the design: card buttons with title,
+   price, compare-at price, discount badge, per-unit price.
+   ============================================================ */
+
+/* ---- Container ---- */
+.variant-picker {
+  padding-block-start: var(--vp-padding-block-start, 0px);
+  padding-block-end: var(--vp-padding-block-end, 8px);
+  padding-inline-start: var(--vp-padding-inline-start, 0px);
+  padding-inline-end: var(--vp-padding-inline-end, 0px);
+}
+
+.variant-picker--align-center { text-align: center; }
+.variant-picker--align-right  { text-align: right; }
+.variant-picker--align-left   { text-align: left; }
+
+/* ---- Section heading ---- */
+.variant-picker__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #111;
+  margin: 0 0 12px;
+  letter-spacing: 0.02em;
+}
+
+/* ---- Card grid ---- */
+.variant-picker__cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ---- Individual card ---- */
+.variant-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 110px;
+  padding: 10px 14px 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  font-family: inherit;
+}
+
+.variant-card:hover:not(.variant-card--selected):not(.variant-card--sold-out) {
+  border-color: #9ca3af;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* ---- Selected state — dark green, matches image ---- */
+.variant-card--selected {
+  background: #1e5e45;   /* deep forest green */
+  border-color: #1e5e45;
+  box-shadow: 0 2px 10px rgba(30, 94, 69, 0.25);
+}
+
+.variant-card--selected .variant-card__title,
+.variant-card--selected .variant-card__price,
+.variant-card--selected .variant-card__per-unit {
+  color: #ffffff;
+}
+
+/* Compare-at stays muted on selected card */
+.variant-card--selected .variant-card__compare s {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+/* ---- Sold-out state ---- */
+.variant-card--sold-out {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #f3f4f6;
+}
+
+.variant-card__sold-out-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  background: #6b7280;
+  color: #fff;
+  padding: 2px 5px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+
+/* ---- Variant title ---- */
+.variant-card__title {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+/* ---- Price row ---- */
+.variant-card__prices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+  margin-top: 2px;
+}
+
+.variant-card__price {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
+}
+
+/* Compare-at + discount on same line */
+.variant-card__compare {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.variant-card__compare s {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  font-weight: 400;
+  text-decoration: line-through;
+  white-space: nowrap;
+}
+
+.variant-card__discount {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #e74c3c;   /* red, matches image */
+  white-space: nowrap;
+}
+
+/* ---- Per-unit price ---- */
+.variant-card__per-unit {
+  font-size: 0.72rem;
+  color: #6b7280;
+  font-weight: 400;
+  margin-top: 1px;
+}
+
+.variant-card--selected .variant-card__per-unit {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ---- Dropdown style (fallback) ---- */
+.variant-picker__dropdown-wrap {
+  margin-bottom: 12px;
+}
+
+.variant-picker__dropdown-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #374151;
+}
+
+.variant-picker__dropdown {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #fff;
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.variant-picker__dropdown:focus {
+  outline: none;
+  border-color: #1e5e45;
+  box-shadow: 0 0 0 3px rgba(30, 94, 69, 0.12);
+}
+
+/* ---- Responsive: stack on very small screens ---- */
+@media (max-width: 360px) {
+  .variant-picker__cards {
+    flex-direction: column;
+  }
+  .variant-card {
+    min-width: unset;
+    width: 100%;
+  }
+}
