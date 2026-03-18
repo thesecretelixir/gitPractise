@@ -1,0 +1,458 @@
+{% comment %}
+  Section: main-product.liquid  (Horizon theme override)
+  =========================================================
+  Redesigned product page matching the Anveshan-style layout:
+    ✓ Product image gallery (left)
+    ✓ Share button
+    ✓ Tagline / badge strip
+    ✓ Star rating row + price (same row)
+    ✓ MRP label
+    ✓ Loyalty coins banner
+    ✓ Best-price / coupon banner
+    ✓ Upsell / add-on widget
+    ✓ Variant cards with per-size price grid
+    ✓ Quantity + Add to cart + Buy Now CTAs
+    ✓ App download banner
+
+  INSTRUCTIONS — drop this file into your theme's /sections/ folder,
+  replacing the existing main-product.liquid.
+  Also add to your theme.liquid (inside <head>):
+    {{ 'product-page-custom.css' | asset_url | stylesheet_tag }}
+=========================================================
+{% endcomment %}
+
+{{ 'product-page-custom.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign current_variant = product.selected_or_first_available_variant
+  assign product_form_id  = 'product-form-' | append: section.id
+
+  assign enable_loyalty   = section.settings.enable_loyalty_banner
+  assign enable_upsell    = section.settings.enable_upsell_widget
+  assign enable_app_banner = section.settings.enable_app_banner
+  assign coupon_code      = section.settings.coupon_code
+  assign coupon_price     = section.settings.coupon_best_price
+  assign google_play_url  = section.settings.google_play_url
+  assign app_store_url    = section.settings.app_store_url
+  assign upsell_handle    = section.settings.upsell_product_handle
+  assign app_discount_pct = section.settings.app_discount_pct
+  assign app_coupon_code  = section.settings.app_coupon_code
+  assign tagline          = section.settings.product_tagline
+
+  assign show_rating      = section.settings.show_rating
+  assign rating_value     = product.metafields.reviews.rating.value | default: product.metafields.custom.rating_value
+  assign rating_count     = product.metafields.reviews.rating_count | default: product.metafields.custom.rating_count
+-%}
+
+<section
+  class="product section-{{ section.id }}"
+  id="MainProduct-{{ section.id }}"
+  data-section="{{ section.id }}"
+>
+  <div class="page-width">
+    <div class="product__grid">
+
+      <!-- ======================================================
+           LEFT — Media Gallery
+           ====================================================== -->
+      <div class="product__media-wrapper">
+        {%- for media in product.media -%}
+          <div
+            class="product__media-item{% if forloop.first %} product__media-item--active{% endif %}"
+            data-media-id="{{ media.id }}"
+          >
+            {%- case media.media_type -%}
+              {%- when 'image' -%}
+                <img
+                  srcset="
+                    {{ media | image_url: width: 400 }} 400w,
+                    {{ media | image_url: width: 800 }} 800w,
+                    {{ media | image_url: width: 1200 }} 1200w
+                  "
+                  sizes="(min-width: 990px) 50vw, 100vw"
+                  src="{{ media | image_url: width: 800 }}"
+                  alt="{{ media.alt | escape }}"
+                  class="product__media-image"
+                  width="{{ media.width }}"
+                  height="{{ media.height }}"
+                  {% if forloop.first %}fetchpriority="high"{% else %}loading="lazy"{% endif %}
+                >
+              {%- when 'video' -%}
+                {{ media | video_tag: autoplay: false, loop: false, controls: true, class: 'product__media-video' }}
+              {%- when 'model' -%}
+                {{ media | model_viewer_tag: reveal: 'interaction', toggleable: true }}
+            {%- endcase -%}
+          </div>
+        {%- endfor -%}
+
+        {%- if product.media.size > 1 -%}
+          <div class="product__media-thumbnails" role="list">
+            {%- for media in product.media -%}
+              <button
+                class="product__thumbnail{% if forloop.first %} product__thumbnail--active{% endif %}"
+                data-media-id="{{ media.id }}"
+                aria-label="{{ media.alt | escape | default: product.title }}"
+                role="listitem"
+                type="button"
+              >
+                <img
+                  src="{{ media | image_url: width: 120 }}"
+                  alt="{{ media.alt | escape }}"
+                  width="80"
+                  height="80"
+                  loading="lazy"
+                >
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- ======================================================
+           RIGHT — Product Info
+           ====================================================== -->
+      <div class="product__info-wrapper">
+
+        <!-- Share button -->
+        <button
+          type="button"
+          class="product__share-btn js-share-btn"
+          aria-label="Share this product"
+          onclick="
+            if (navigator.share) {
+              navigator.share({ title: {{ product.title | json }}, url: window.location.href });
+            } else {
+              navigator.clipboard.writeText(window.location.href);
+              this.setAttribute('title', 'Link copied!');
+            }
+          "
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/>
+          </svg>
+        </button>
+
+        <!-- Product Title -->
+        <h1 class="product__title">{{ product.title }}</h1>
+
+        <!-- Tagline strip -->
+        {%- if tagline != blank -%}
+          <p class="product__meta-tagline">{{ tagline }}</p>
+        {%- elsif product.metafields.custom.tagline != blank -%}
+          <p class="product__meta-tagline">{{ product.metafields.custom.tagline }}</p>
+        {%- endif -%}
+
+        <!-- Rating + Price Row -->
+        <div class="product__rating-row">
+          {%- if show_rating and rating_value != blank -%}
+            <div class="product__rating-stars" aria-label="{{ rating_value }} out of 5 stars">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+              </svg>
+              <span>{{ rating_value }}</span>
+              {%- if rating_count != blank -%}
+                <span class="product__rating-count">({{ rating_count }} reviews)</span>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+
+          <!-- Price -->
+          <div class="product__price-block">
+            <span
+              class="product__price-main js-product-price"
+              id="price-{{ section.id }}"
+            >
+              {%- if current_variant.price -%}
+                {{ current_variant.price | money }}
+              {%- else -%}
+                {{ product.price_min | money }}
+              {%- endif -%}
+            </span>
+            {%- if current_variant.compare_at_price > current_variant.price -%}
+              <s class="product__price-compare js-product-compare-price" style="font-size:1rem;color:#888;">
+                {{ current_variant.compare_at_price | money }}
+              </s>
+            {%- endif -%}
+          </div>
+        </div>
+        <span class="product__price-mrp-label">MRP (Incl. of all taxes)</span>
+
+        <!-- Loyalty Coins Banner -->
+        {%- if enable_loyalty -%}
+          {% render 'product-loyalty-banner', product: product, variant: current_variant %}
+        {%- endif -%}
+
+        <!-- Best Price / Coupon Banner -->
+        {%- if coupon_code != blank -%}
+          <div class="product__coupon-banner">
+            Best Price
+            {%- if coupon_price != blank -%}
+              &nbsp;{{ coupon_price }}
+            {%- endif -%}
+            &nbsp;with coupon&nbsp;
+            <span class="coupon-tag">{{ coupon_code }}</span>
+          </div>
+        {%- endif -%}
+
+        <!-- Upsell Widget -->
+        {%- if enable_upsell -%}
+          {% render 'product-upsell-widget',
+            upsell_product_handle: upsell_handle,
+            product: product
+          %}
+        {%- endif -%}
+
+        <!-- Product Form -->
+        {%- form 'product', product, id: product_form_id, novalidate: 'novalidate' -%}
+          <input type="hidden" name="id" value="{{ current_variant.id }}" class="js-variant-id-input">
+
+          <!-- Variant Picker — Price Cards -->
+          {% render 'product-variant-picker-cards',
+            product: product,
+            block: block,
+            product_form_id: product_form_id
+          %}
+
+          <!-- Quantity -->
+          <div class="product__quantity-wrapper">
+            <span class="product__quantity-label">Qty</span>
+            <quantity-input class="quantity">
+              <button class="quantity__button no-js-hidden" name="minus" type="button" aria-label="Decrease quantity">
+                <span aria-hidden="true">&#8722;</span>
+              </button>
+              <input
+                class="quantity__input"
+                type="number"
+                name="quantity"
+                id="Quantity-{{ section.id }}"
+                min="1"
+                value="1"
+                form="{{ product_form_id }}"
+                aria-label="Quantity"
+              >
+              <button class="quantity__button no-js-hidden" name="plus" type="button" aria-label="Increase quantity">
+                <span aria-hidden="true">&#43;</span>
+              </button>
+            </quantity-input>
+          </div>
+
+          <!-- CTA Buttons -->
+          <div class="product__cta-row">
+            <button
+              type="submit"
+              name="add"
+              class="product__btn-add-to-cart"
+              {% unless current_variant.available %}disabled{% endunless %}
+              form="{{ product_form_id }}"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2S15.9 22 17 22s2-.9 2-2-.9-2-2-2zm-17-16v2h2l3.6 7.59-1.35 2.44C4.09 14.32 4 14.65 4 15c0 1.1.9 2 2 2h12v-2H6.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63H19c.75 0 1.41-.41 1.75-1.03l3.58-6.49A1 1 0 0023.45 5H5.21l-.94-2H1z"/>
+              </svg>
+              {%- if current_variant.available -%}
+                Add to cart
+              {%- else -%}
+                Sold out
+              {%- endif -%}
+            </button>
+
+            {%- unless current_variant.available == false -%}
+              {{ form | payment_button }}
+            {%- endunless -%}
+          </div>
+        {%- endform -%}
+
+        <!-- App Download Banner -->
+        {%- if enable_app_banner -%}
+          {% render 'product-app-banner',
+            google_play_url: google_play_url,
+            app_store_url: app_store_url,
+            app_discount_pct: app_discount_pct,
+            app_coupon_code: app_coupon_code
+          %}
+        {%- endif -%}
+
+        <!-- Product Description -->
+        {%- if product.description != blank -%}
+          <div class="product__description rte">
+            {{ product.description }}
+          </div>
+        {%- endif -%}
+
+      </div><!-- /.product__info-wrapper -->
+    </div><!-- /.product__grid -->
+  </div><!-- /.page-width -->
+</section>
+
+<!-- ============================================================
+     Thumbnail Gallery JS (lightweight, no deps)
+     ============================================================ -->
+<script>
+  (function () {
+    var section = document.getElementById('MainProduct-{{ section.id }}');
+    if (!section) return;
+
+    var items      = section.querySelectorAll('.product__media-item');
+    var thumbs     = section.querySelectorAll('.product__thumbnail');
+
+    function showMedia(mediaId) {
+      items.forEach(function (item) {
+        item.classList.toggle('product__media-item--active', item.dataset.mediaId === mediaId);
+      });
+      thumbs.forEach(function (thumb) {
+        thumb.classList.toggle('product__thumbnail--active', thumb.dataset.mediaId === mediaId);
+      });
+    }
+
+    thumbs.forEach(function (thumb) {
+      thumb.addEventListener('click', function () {
+        showMedia(thumb.dataset.mediaId);
+      });
+    });
+
+    // Update price when variant changes (Shopify variant:change event)
+    document.addEventListener('variant:change', function (e) {
+      var v = (e.detail || {}).variant;
+      if (!v) return;
+
+      var priceEl   = section.querySelector('.js-product-price');
+      var compareEl = section.querySelector('.js-product-compare-price');
+      var idInput   = section.querySelector('.js-variant-id-input');
+      var addBtn    = section.querySelector('.product__btn-add-to-cart');
+
+      if (priceEl)   priceEl.innerHTML   = formatMoney(v.price);
+      if (compareEl) compareEl.innerHTML = v.compare_at_price > v.price ? formatMoney(v.compare_at_price) : '';
+      if (idInput)   idInput.value       = v.id;
+      if (addBtn) {
+        addBtn.disabled    = !v.available;
+        addBtn.querySelector('span') && (addBtn.lastChild.textContent = v.available ? ' Add to cart' : ' Sold out');
+      }
+
+      // Switch gallery to variant image
+      if (v.featured_media) {
+        showMedia(String(v.featured_media.id));
+      }
+    });
+
+    function formatMoney(cents) {
+      // Basic rupee formatter — Shopify's money_format handles this in Liquid
+      // This is only used for JS-side updates
+      var amount = (cents / 100).toFixed(2);
+      return '&#8377;' + amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Product Information",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Product Tagline"
+    },
+    {
+      "type": "text",
+      "id": "product_tagline",
+      "label": "Tagline / badge strip text",
+      "info": "Short uppercase text under the title, e.g. 'MILK FROM GIR COWS | BILONA-CHURNED | 70+ QUALITY CHECKS'. Leave blank to use the product metafield custom.tagline."
+    },
+    {
+      "type": "header",
+      "content": "Ratings"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Show product rating",
+      "default": true,
+      "info": "Uses Judge.me / Yotpo metafields (reviews.rating, reviews.rating_count) or custom.rating_value / custom.rating_count metafields."
+    },
+    {
+      "type": "header",
+      "content": "Loyalty Coins Banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_loyalty_banner",
+      "label": "Show loyalty coins banner",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Best Price / Coupon"
+    },
+    {
+      "type": "text",
+      "id": "coupon_code",
+      "label": "Coupon code",
+      "placeholder": "e.g. SAVE10",
+      "info": "Leave blank to hide the coupon banner."
+    },
+    {
+      "type": "text",
+      "id": "coupon_best_price",
+      "label": "Best price with coupon",
+      "placeholder": "e.g. ₹1,041",
+      "info": "Displayed next to the coupon code in the banner."
+    },
+    {
+      "type": "header",
+      "content": "Upsell / Add-On Widget"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_upsell_widget",
+      "label": "Show upsell widget",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "upsell_product_handle",
+      "label": "Upsell product handle",
+      "placeholder": "e.g. ghee-testing-kit",
+      "info": "The Shopify product handle for the add-on product. You can also set it via the product metafield custom.upsell_product."
+    },
+    {
+      "type": "header",
+      "content": "App Download Banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_app_banner",
+      "label": "Show app download banner",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "app_discount_pct",
+      "label": "App discount percentage",
+      "default": "17",
+      "placeholder": "17"
+    },
+    {
+      "type": "text",
+      "id": "app_coupon_code",
+      "label": "App coupon code",
+      "default": "APP17",
+      "placeholder": "APP17"
+    },
+    {
+      "type": "url",
+      "id": "google_play_url",
+      "label": "Google Play Store URL"
+    },
+    {
+      "type": "url",
+      "id": "app_store_url",
+      "label": "Apple App Store URL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Product Information"
+    }
+  ]
+}
+{% endschema %}

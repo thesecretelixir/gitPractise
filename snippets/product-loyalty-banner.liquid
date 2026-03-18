@@ -1,0 +1,61 @@
+{% comment %}
+  Snippet: product-loyalty-banner.liquid
+  ----------------------------------------
+  Renders a green loyalty-coins banner below the price.
+
+  Usage:
+    {% render 'product-loyalty-banner', product: product, variant: current_variant %}
+
+  How it calculates coins:
+    - Uses metafield `custom.coins_per_unit` on the product (optional).
+    - Falls back to: floor(price / 20) — i.e. 1 coin per ₹20 spent.
+
+  To enable:
+    Set product metafield `custom.loyalty_program_enabled` = true
+    in Shopify Admin → Products → Metafields.
+{% endcomment %}
+
+{%- liquid
+  assign show_loyalty = product.metafields.custom.loyalty_program_enabled
+  if show_loyalty == blank
+    assign show_loyalty = true
+  endif
+-%}
+
+{%- if show_loyalty -%}
+  {%- liquid
+    assign coins_per_unit = product.metafields.custom.coins_per_unit | plus: 0
+    if coins_per_unit == 0
+      assign coins_per_unit = variant.price | divided_by: 2000
+      if coins_per_unit == 0
+        assign coins_per_unit = 1
+      endif
+    endif
+    assign loyalty_coins = variant.price | divided_by: 2000
+    if loyalty_coins < 1
+      assign loyalty_coins = 1
+    endif
+  -%}
+
+  <div class="product__loyalty-banner" aria-label="Loyalty reward">
+    <span class="loyalty-coin-icon" aria-hidden="true">🪙</span>
+    <span>
+      Buy now &amp; earn
+      <strong class="js-loyalty-coins">{{ loyalty_coins }}</strong>
+      Purity Coins instantly
+    </span>
+  </div>
+
+  <script>
+    (function () {
+      // Dynamically update coin count when variant changes
+      document.addEventListener('variant:change', function (e) {
+        var detail = e.detail || {};
+        var price = detail.price || 0;                // price in cents/paise
+        var coins = Math.max(1, Math.floor(price / 2000));
+        var el = document.querySelector('.js-loyalty-coins');
+        if (el) el.textContent = coins;
+      });
+    })();
+  </script>
+{%- endif -%}

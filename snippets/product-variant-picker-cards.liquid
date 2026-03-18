@@ -1,0 +1,128 @@
+{% comment %}
+  Snippet: product-variant-picker-cards.liquid
+  -----------------------------------------------
+  Renders variant options as price-card grid instead of plain pills.
+  Replaces the default Horizon variant picker for the product page.
+
+  Usage:
+    {% render 'product-variant-picker-cards', product: product, block: block, product_form_id: product_form_id %}
+
+  Expects metafields (optional):
+    product.metafields.custom.unit_label  → e.g. "₹2500/L"
+{% endcomment %}
+
+{%- unless product.has_only_default_variant -%}
+  {%- for option in product.options_with_values -%}
+    <fieldset class="product__variant-fieldset js-variant-fieldset" data-option-index="{{ forloop.index0 }}">
+      <span class="product__variant-label">
+        {{ option.name }}:
+        <strong class="js-selected-variant-label">{{ option.selected_value }}</strong>
+      </span>
+
+      <div class="product__variant-cards" role="radiogroup" aria-label="{{ option.name }}">
+        {%- for value in option.values -%}
+          {%- assign variant_for_value = nil -%}
+          {%- assign is_available = false -%}
+          {%- assign variant_price = nil -%}
+          {%- assign variant_compare = nil -%}
+          {%- assign discount_pct = 0 -%}
+
+          {%- comment %} Find matching variant for this option value {%- endcomment -%}
+          {%- for variant in product.variants -%}
+            {%- if variant.option1 == value or variant.option2 == value or variant.option3 == value -%}
+              {%- unless variant_for_value -%}
+                {%- assign variant_for_value = variant -%}
+                {%- assign variant_price = variant.price -%}
+                {%- assign variant_compare = variant.compare_at_price -%}
+                {%- if variant.available -%}
+                  {%- assign is_available = true -%}
+                {%- endif -%}
+              {%- endunless -%}
+            {%- endif -%}
+          {%- endfor -%}
+
+          {%- if variant_compare and variant_compare > variant_price -%}
+            {%- assign discount_pct = variant_compare | minus: variant_price | times: 100 | divided_by: variant_compare | round -%}
+          {%- endif -%}
+
+          {%- assign card_classes = 'product__variant-card js-variant-card' -%}
+          {%- if value == option.selected_value -%}
+            {%- assign card_classes = card_classes | append: ' is-selected' -%}
+          {%- endif -%}
+          {%- unless is_available -%}
+            {%- assign card_classes = card_classes | append: ' is-unavailable' -%}
+          {%- endunless -%}
+
+          <label
+            class="{{ card_classes }}"
+            data-value="{{ value | escape }}"
+            data-variant-id="{{ variant_for_value.id }}"
+            data-option-index="{{ forloop.parentloop.index0 }}"
+            title="{{ value }}{% unless is_available %} — {{ 'products.product.sold_out' | t }}{% endunless %}"
+          >
+            <input
+              type="radio"
+              class="visually-hidden"
+              name="{{ option.name | handleize }}-{{ section.id }}"
+              value="{{ value | escape }}"
+              {% if value == option.selected_value %}checked{% endif %}
+              {% unless is_available %}disabled{% endunless %}
+              form="{{ product_form_id }}"
+            >
+
+            {%- if discount_pct > 0 -%}
+              <span class="product__variant-card-discount">{{ discount_pct }}% off</span>
+            {%- endif -%}
+
+            <span class="product__variant-card-size">{{ value }}</span>
+
+            {%- if variant_price -%}
+              <span class="product__variant-card-price">{{ variant_price | money }}</span>
+            {%- endif -%}
+
+            {%- if variant_compare and variant_compare > variant_price -%}
+              <span class="product__variant-card-compare">{{ variant_compare | money }}</span>
+            {%- endif -%}
+
+            {%- comment %}
+              Per-unit price: stored in variant metafield `custom.price_per_unit`
+              e.g. "₹2500/L" — set this in Shopify admin → Products → Variants → Metafields
+            {%- endcomment -%}
+            {%- if variant_for_value.metafields.custom.price_per_unit != blank -%}
+              <span class="product__variant-card-unit">{{ variant_for_value.metafields.custom.price_per_unit }}</span>
+            {%- endif -%}
+          </label>
+        {%- endfor -%}
+      </div>
+    </fieldset>
+  {%- endfor -%}
+{%- endunless -%}
+
+<script>
+  (function () {
+    var fieldsets = document.querySelectorAll('.js-variant-fieldset');
+
+    fieldsets.forEach(function (fieldset) {
+      var cards = fieldset.querySelectorAll('.js-variant-card');
+      var label = fieldset.querySelector('.js-selected-variant-label');
+
+      cards.forEach(function (card) {
+        card.addEventListener('click', function () {
+          // Update radio
+          var radio = card.querySelector('input[type="radio"]');
+          if (radio && !radio.disabled) {
+            radio.checked = true;
+            radio.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+
+          // Update selected state
+          cards.forEach(function (c) { c.classList.remove('is-selected'); });
+          card.classList.add('is-selected');
+
+          // Update label text
+          if (label) label.textContent = card.dataset.value;
+        });
+      });
+    });
+  })();
+</script>

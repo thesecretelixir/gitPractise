@@ -1,0 +1,96 @@
+{% comment %}
+  Snippet: product-upsell-widget.liquid
+  ----------------------------------------
+  Renders an inline upsell / add-on product card on the product page
+  (similar to "Ghee Adulteration Rapid Testing Kit" on Anveshan).
+
+  Usage:
+    {% render 'product-upsell-widget', upsell_product_handle: 'testing-kit' %}
+
+  Setup in Shopify Admin:
+    1. Create a product for the add-on (e.g. "Ghee Testing Kit").
+    2. Set the product metafield `custom.upsell_product` (type: product reference)
+       on your main ghee product, pointing to the testing-kit product.
+    3. OR hardcode the handle below / pass it from the section schema setting.
+
+  Alternatively set via section schema setting `upsell_product` (product picker).
+{% endcomment %}
+
+{%- liquid
+  assign upsell = nil
+
+  if upsell_product_handle != blank
+    assign upsell = all_products[upsell_product_handle]
+  endif
+
+  if upsell == nil and product.metafields.custom.upsell_product != blank
+    assign upsell = product.metafields.custom.upsell_product.value
+  endif
+-%}
+
+{%- if upsell != nil and upsell != empty -%}
+  {%- assign upsell_variant = upsell.selected_or_first_available_variant -%}
+  <div class="product__upsell-widget" data-upsell-product-id="{{ upsell.id }}">
+    <span class="product__upsell-badge">TEST. TRUST.</span>
+
+    {%- if upsell.featured_image -%}
+      <img
+        class="product__upsell-image"
+        src="{{ upsell.featured_image | image_url: width: 128 }}"
+        alt="{{ upsell.featured_image.alt | escape }}"
+        width="64"
+        height="64"
+        loading="lazy"
+      >
+    {%- endif -%}
+
+    <div class="product__upsell-info">
+      <p class="product__upsell-title">{{ upsell.title }}</p>
+      <p class="product__upsell-price">{{ upsell_variant.price | money }}</p>
+    </div>
+
+    <button
+      type="button"
+      class="product__upsell-add-btn js-upsell-add-btn"
+      data-variant-id="{{ upsell_variant.id }}"
+      aria-label="Add {{ upsell.title | escape }} to cart"
+    >
+      Add to cart
+    </button>
+  </div>
+
+  <script>
+    (function () {
+      var btn = document.querySelector('.js-upsell-add-btn');
+      if (!btn) return;
+
+      btn.addEventListener('click', function () {
+        var variantId = parseInt(btn.dataset.variantId, 10);
+        if (!variantId) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Adding…';
+
+        fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: [{ id: variantId, quantity: 1 }] })
+        })
+          .then(function (res) { return res.json(); })
+          .then(function () {
+            btn.textContent = '✓ Added';
+            btn.style.background = '#1b5e20';
+            btn.style.color = '#fff';
+            btn.style.borderColor = '#1b5e20';
+
+            // Refresh cart drawer / bubble (Horizon fires this event)
+            document.dispatchEvent(new CustomEvent('cart:refresh'));
+          })
+          .catch(function () {
+            btn.disabled = false;
+            btn.textContent = 'Add to cart';
+          });
+      });
+    })();
+  </script>
+{%- endif -%}

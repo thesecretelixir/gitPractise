@@ -1,0 +1,57 @@
+{% comment %}
+  Snippet: product-app-banner.liquid
+  ----------------------------------------
+  Renders the "Shop on App & unlock X% OFF" banner.
+
+  Usage:
+    {% render 'product-app-banner' %}
+
+  Customise via section schema settings passed as variables:
+    - app_discount_pct   (default "17")
+    - app_coupon_code    (default "APP17")
+    - google_play_url    (set in section settings)
+    - app_store_url      (set in section settings)
+{% endcomment %}
+
+{%- liquid
+  unless app_discount_pct
+    assign app_discount_pct = '17'
+  endunless
+  unless app_coupon_code
+    assign app_coupon_code = 'APP17'
+  endunless
+-%}
+
+{%- if google_play_url != blank or app_store_url != blank -%}
+  <div class="product__app-banner">
+    <p>Shop on our App &amp; unlock {{ app_discount_pct }}% OFF (15% + 2% extra on App-only)</p>
+    <div class="app-code-row">
+      <span>Use code:</span>
+      <span class="app-code">{{ app_coupon_code }}</span>
+    </div>
+    <div class="product__app-store-links">
+      {%- if google_play_url != blank -%}
+        <a href="{{ google_play_url }}" target="_blank" rel="noopener noreferrer" aria-label="Get it on Google Play">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg"
+            alt="Get it on Google Play"
+            height="36"
+            width="120"
+            loading="lazy"
+          >
+        </a>
+      {%- endif -%}
+      {%- if app_store_url != blank -%}
+        <a href="{{ app_store_url }}" target="_blank" rel="noopener noreferrer" aria-label="Download on the App Store">
+          <img
+            src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg"
+            alt="Download on the App Store"
+            height="36"
+            width="120"
+            loading="lazy"
+          >
+        </a>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
