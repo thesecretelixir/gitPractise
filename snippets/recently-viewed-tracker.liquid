@@ -15,7 +15,7 @@
       id: {{ product.id }},
       title: {{ product.title | json }},
       url: {{ product.url | json }},
-      image: {{ product.featured_image | img_url: '400x400' | json }},
+      image: "https:{{ product.featured_image | image_url: width: 400 }}",
       price: {{ product.price | money | json }}
     };
 
