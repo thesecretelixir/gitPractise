@@ -1,0 +1,187 @@
+{% assign p = closest.product.metafields.custom %}
+<div class="product-faq-wrapper">
+  {% if p.product_short_description != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">Additional Information</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">
+      {{ p.product_short_description.value }}
+    </div>
+  </div>
+  {% endif %}
+  {% if p.question_one != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">{{ p.question_one }}</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">{{ p.bullet_point_one }}</div>
+  </div>
+  {% endif %}
+  {% if p.question_two != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">{{ p.question_two }}</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">{{ p.bullet_point_tow }}</div>
+  </div>
+  {% endif %}
+  {% if p.question_three != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">{{ p.question_three }}</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">{{ p.bullet_point_three }}</div>
+  </div>
+  {% endif %}
+  {% if p.question_four != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">{{ p.question_four }}</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">{{ p.bullet_point_four }}</div>
+  </div>
+  {% endif %}
+  {% if p.question_five != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">{{ p.question_five }}</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">{{ p.bullet_point_five }}</div>
+  </div>
+  {% endif %}
+  {% if p.question_six != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">{{ p.question_six }}</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">{{ p.bullet_point_six }}</div>
+  </div>
+  {% endif %}
+  {% if p.question_seven != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">{{ p.question_seven }}</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">{{ p.bullet_point_seven }}</div>
+  </div>
+  {% endif %}
+  {% if p.question_eight != blank %}
+  <div class="faq-item">
+    <button class="faq-question">
+      <span class="faq-q-label">Q.</span>
+      <span class="faq-q-text">{{ p.question_eight }}</span>
+      <span class="faq-icon">+</span>
+    </button>
+    <div class="faq-answer">{{ p.bullet_point_eight }}</div>
+  </div>
+  {% endif %}
+</div>
+
+{% schema %}
+{
+  "name": "Product FAQ",
+  "tag": "section",
+  "class": "section",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Product FAQ"
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  .product-faq-wrapper {
+    max-width: 100%;
+    margin: 50px 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .faq-item {
+    border: 1px solid #d6dde0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  .faq-question {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 18px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #1a3a3a;
+  }
+
+  .faq-q-label {
+    color: #1a3a3a;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .faq-q-text {
+    flex: 1;
+    color: #1a3a3a;
+  }
+
+  .faq-icon {
+    font-size: 20px;
+    font-weight: 300;
+    color: #1a3a3a;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+    line-height: 1;
+  }
+
+  .faq-question.open .faq-icon {
+    transform: rotate(45deg);
+  }
+
+  .faq-answer {
+    display: none;
+    padding: 0 20px 18px 20px;
+    font-size: 15px;
+    line-height: 1.7;
+    color: #444;
+    border-top: 1px solid #eef1f2;
+  }
+
+  .faq-answer.active {
+    display: block;
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.faq-question').forEach((q) => {
+    q.addEventListener('click', () => {
+      q.classList.toggle('open');
+      q.nextElementSibling.classList.toggle('active');
+    });
+  });
+</script>
