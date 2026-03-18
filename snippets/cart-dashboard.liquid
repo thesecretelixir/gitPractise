@@ -1,0 +1,144 @@
+{% comment %}
+  Cart Dashboard Snippet
+  - Fetches live Shopify cart via /cart.js
+  - Renders cart items inside the My Cart tab of the account dashboard
+  - Updates the dashboard cart counter
+  - Shows a "Share Cart on WhatsApp" button
+
+  Usage: place {% render 'cart-dashboard' %} inside the wishlist/cart tab section.
+  Replace the static wishlist-render div with:
+
+    <div id="wishlist-render">
+      <div class="acc-empty">...</div>
+    </div>
+    {% render 'cart-dashboard' %}
+{% endcomment %}
+
+<div id="cart-wa-wrap" style="display:none; margin-top:20px;">
+  <button id="cart-wa-btn" type="button" class="cart-wa-btn">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.556 4.123 1.527 5.856L.057 23.882a.5.5 0 00.606.61l6.198-1.618A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22a9.95 9.95 0 01-5.073-1.387l-.361-.214-3.743.977.998-3.648-.235-.374A9.953 9.953 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+    </svg>
+    Share Cart on WhatsApp
+  </button>
+</div>
+
+<style>
+  .cart-wa-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #25d366;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+  }
+  .cart-wa-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+  .cart-item-qty {
+    display: inline-block;
+    background: #f3f4f6;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 4px;
+  }
+</style>
+
+<script>
+(function () {
+  var shopName = {{ shop.name | json }};
+  var shopCurrency = {{ cart.currency.symbol | json }};
+
+  /* ── Format cents to money string ── */
+  function formatMoney(cents) {
+    return shopCurrency + (cents / 100).toFixed(2);
+  }
+
+  /* ── Render cart items in a product grid ── */
+  function renderCartGrid(items, containerId) {
+    var el = document.getElementById(containerId);
+    if (!el) return;
+
+    var html = '<div class="acc-product-grid">';
+    items.forEach(function (item) {
+      var img = item.image || '';
+      /* Shopify cart images may start with // */
+      if (img && img.indexOf('http') !== 0) img = 'https:' + img;
+
+      html += '<a href="' + item.url + '" class="acc-product-card">'
+        + '<img class="acc-product-img" src="' + img + '" alt="' + item.title + '" loading="lazy">'
+        + '<div class="acc-product-info">'
+        + '<p class="acc-product-name">' + item.title + '</p>'
+        + '<p class="acc-product-price">' + formatMoney(item.price) + '</p>'
+        + '<span class="cart-item-qty">Qty: ' + item.quantity + '</span>'
+        + '</div></a>';
+    });
+    html += '</div>';
+    el.innerHTML = html;
+  }
+
+  /* ── Build WhatsApp message from cart items ── */
+  function buildWhatsAppURL(items, total) {
+    var lines = ['Hi! Here is my cart from ' + shopName + ':\n'];
+    items.forEach(function (item, i) {
+      lines.push(
+        (i + 1) + '. ' + item.title
+        + ' (Qty: ' + item.quantity + ')'
+        + ' — ' + formatMoney(item.price)
+        + '\n   ' + window.location.origin + item.url
+      );
+    });
+    lines.push('\nCart Total: ' + formatMoney(total));
+    lines.push('\nPlease help me complete my order.');
+    return 'https://wa.me/?text=' + encodeURIComponent(lines.join('\n'));
+  }
+
+  /* ── Update dashboard counter ── */
+  function updateCounter(count) {
+    document.querySelectorAll('#dash-wishlist-count').forEach(function (el) {
+      el.textContent = count;
+    });
+  }
+
+  /* ── Main: fetch cart and populate UI ── */
+  fetch('/cart.js')
+    .then(function (r) { return r.json(); })
+    .then(function (cart) {
+      var items = cart.items;
+      var itemCount = cart.item_count;
+      var totalPrice = cart.total_price;
+
+      /* update counter in dashboard stats */
+      updateCounter(itemCount);
+
+      if (items.length > 0) {
+        /* render product grid in the tab */
+        renderCartGrid(items, 'wishlist-render');
+
+        /* show WhatsApp share button */
+        var wrap = document.getElementById('cart-wa-wrap');
+        if (wrap) wrap.style.display = 'block';
+
+        /* wire up WhatsApp button */
+        var btn = document.getElementById('cart-wa-btn');
+        if (btn) {
+          btn.addEventListener('click', function () {
+            window.open(buildWhatsAppURL(items, totalPrice), '_blank');
+          });
+        }
+      }
+    })
+    .catch(function (err) {
+      console.warn('Cart fetch failed:', err);
+    });
+})();
+</script>
