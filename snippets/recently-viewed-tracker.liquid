@@ -1,0 +1,44 @@
+{% comment %}
+  Recently Viewed Tracker
+  Saves current product data to localStorage under 'shopify_recently_viewed'.
+  The account dashboard reads from this key to render the Recently Viewed tab.
+  Place this snippet at the bottom of your main product section.
+{% endcomment %}
+
+<script>
+(function () {
+  try {
+    var KEY = 'shopify_recently_viewed';
+    var MAX_ITEMS = 20;
+
+    var product = {
+      id: {{ product.id }},
+      title: {{ product.title | json }},
+      url: {{ product.url | json }},
+      image: {{ product.featured_image | img_url: '400x400' | json }},
+      price: {{ product.price | money | json }}
+    };
+
+    var rv = [];
+    try {
+      rv = JSON.parse(localStorage.getItem(KEY) || '[]');
+      if (!Array.isArray(rv)) rv = [];
+    } catch (e) {
+      rv = [];
+    }
+
+    // Remove this product if already in the list (avoid duplicates)
+    rv = rv.filter(function (p) { return p.id !== product.id; });
+
+    // Add to front of list
+    rv.unshift(product);
+
+    // Cap list size
+    rv = rv.slice(0, MAX_ITEMS);
+
+    localStorage.setItem(KEY, JSON.stringify(rv));
+  } catch (e) {
+    // Silently fail — localStorage may be blocked in private mode
+  }
+})();
+</script>
