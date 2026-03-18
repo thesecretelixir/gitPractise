@@ -1,0 +1,151 @@
+{% comment %}
+  Wishlist Button Snippet
+  Usage: {% render 'wishlist-button', product: product %}
+  - Saves/removes product from localStorage key 'shopify_wishlist'
+  - Dashboard reads this key to render the My Wishlist tab
+{% endcomment %}
+
+{%- liquid
+  assign btn_id = 'wl-btn-' | append: product.id
+-%}
+
+<button
+  id="{{ btn_id }}"
+  class="wishlist-btn"
+  aria-label="Add to wishlist"
+  data-product-id="{{ product.id }}"
+  data-product-title="{{ product.title | escape }}"
+  data-product-url="{{ product.url }}"
+  data-product-image="https:{{ product.featured_image | image_url: width: 400 }}"
+  data-product-price="{{ product.price | money }}"
+  type="button"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+    width="22" height="22">
+    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/>
+  </svg>
+</button>
+
+<style>
+  .wishlist-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    cursor: pointer;
+    transition: border-color .2s, background .2s, transform .15s;
+    color: #9ca3af;
+    padding: 0;
+    flex-shrink: 0;
+  }
+  .wishlist-btn:hover {
+    border-color: #f43f5e;
+    color: #f43f5e;
+    transform: scale(1.08);
+  }
+  .wishlist-btn.is-wishlisted {
+    background: #fff1f2;
+    border-color: #f43f5e;
+    color: #f43f5e;
+  }
+  .wishlist-btn.is-wishlisted svg {
+    fill: #f43f5e;
+  }
+</style>
+
+<script>
+(function () {
+  var KEY = 'shopify_wishlist';
+
+  function getWishlist() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch (e) { return []; }
+  }
+
+  function saveWishlist(list) {
+    localStorage.setItem(KEY, JSON.stringify(list));
+  }
+
+  function updateAllButtons(productId, wishlisted) {
+    document.querySelectorAll('[data-product-id="' + productId + '"].wishlist-btn').forEach(function (btn) {
+      btn.classList.toggle('is-wishlisted', wishlisted);
+      btn.setAttribute('aria-label', wishlisted ? 'Remove from wishlist' : 'Add to wishlist');
+    });
+  }
+
+  function initBtn(btn) {
+    var id = parseInt(btn.getAttribute('data-product-id'), 10);
+    var inList = getWishlist().some(function (p) { return p.id === id; });
+    updateAllButtons(id, inList);
+
+    btn.addEventListener('click', function () {
+      var list = getWishlist();
+      var exists = list.some(function (p) { return p.id === id; });
+
+      if (exists) {
+        list = list.filter(function (p) { return p.id !== id; });
+        updateAllButtons(id, false);
+      } else {
+        list.unshift({
+          id: id,
+          title: btn.getAttribute('data-product-title'),
+          url: btn.getAttribute('data-product-url'),
+          image: btn.getAttribute('data-product-image'),
+          price: btn.getAttribute('data-product-price')
+        });
+        updateAllButtons(id, true);
+
+        /* toast notification */
+        showToast('Added to wishlist ❤️');
+      }
+
+      saveWishlist(list);
+
+      /* update dashboard counter if visible */
+      document.querySelectorAll('#dash-wishlist-count').forEach(function (el) {
+        el.textContent = list.length;
+      });
+    });
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('wl-toast');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'wl-toast';
+      t.style.cssText = [
+        'position:fixed', 'bottom:24px', 'left:50%', 'transform:translateX(-50%)',
+        'background:#1a1a1a', 'color:#fff', 'padding:10px 20px',
+        'border-radius:8px', 'font-size:14px', 'font-weight:500',
+        'z-index:9999', 'opacity:0', 'transition:opacity .25s', 'pointer-events:none'
+      ].join(';');
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function () { t.style.opacity = '0'; }, 2500);
+  }
+
+  /* init all wishlist buttons on the page */
+  document.querySelectorAll('.wishlist-btn').forEach(initBtn);
+
+  /* support dynamically added buttons (e.g. quick-view) */
+  if (window.MutationObserver) {
+    new MutationObserver(function (mutations) {
+      mutations.forEach(function (m) {
+        m.addedNodes.forEach(function (node) {
+          if (node.nodeType !== 1) return;
+          if (node.matches && node.matches('.wishlist-btn')) initBtn(node);
+          node.querySelectorAll && node.querySelectorAll('.wishlist-btn').forEach(initBtn);
+        });
+      });
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+})();
+</script>
