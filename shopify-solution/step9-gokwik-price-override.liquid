@@ -1,0 +1,199 @@
+{%- comment -%}
+  GOKWIK — Show Compare-At (Original/MRP) Price in GoKwik Cart & Checkout
+
+  PASTE THIS in layout/theme.liquid just before </body>
+
+  HOW IT WORKS:
+  ────────────────────────────────────────────
+  1. Builds a map of { product_id: compare_at_price } from cart data
+     using Shopify's /cart.js API (available on all plans)
+  2. Uses MutationObserver to watch GoKwik's DOM
+  3. When GoKwik renders price elements, replaces sale price with
+     the compare_at_price for tagged products
+  4. Also injects CSS to hide the sale badge inside GoKwik
+
+  IMPORTANT: Inspect GoKwik's rendered HTML in your browser
+  (right-click cart > Inspect) and update the selectors below
+  if they don’t match.
+{%- endcomment -%}
+
+<script>
+(function() {
+  'use strict';
+
+  // ──────────────────────────────────────────────────
+  // CONFIG — Update these if GoKwik changes their class names
+  // Right-click GoKwik cart > Inspect to find actual class names
+  // ──────────────────────────────────────────────────
+  var CONFIG = {
+    // The product tag that marks products needing original price display
+    targetTag: 'original-price-only',
+
+    // GoKwik container selector (the root element of GoKwik widget)
+    // Common values: '#gokwik-root', '#gokwik-checkout', '#gk-cart'
+    gokwikRoot: '#gokwik-root, #gk-checkout, #gk-cart, [id^="gokwik"]',
+
+    // GoKwik price selectors — UPDATE THESE after inspecting GoKwik's HTML
+    // These are the elements that show the sale price inside GoKwik
+    salePriceSelectors: [
+      '.gk-price',
+      '.gk-item-price',
+      '.gk-discounted-price',
+      '[class*="item-price"]',
+      '[class*="sale-price"]',
+      '[class*="final-price"]'
+    ],
+
+    // GoKwik compare-at / MRP selectors (the original price)
+    compareAtSelectors: [
+      '.gk-compare-price',
+      '.gk-mrp',
+      '[class*="compare-price"]',
+      '[class*="original-price"]',
+      '[class*="mrp"]'
+    ],
+
+    // GoKwik discount badge selectors
+    badgeSelectors: [
+      '.gk-badge',
+      '.gk-discount-badge',
+      '[class*="discount-badge"]',
+      '[class*="off-badge"]',
+      '[class*="sale-badge"]'
+    ]
+  };
+
+  // ──────────────────────────────────────────────────
+  // STEP 1: Fetch cart and build a map of variant => compare_at_price
+  // for products tagged 'original-price-only'
+  // ──────────────────────────────────────────────────
+  var originalPriceMap = {};   // { variantId: compareAtPriceCents }
+  var targetProductIds = [];   // product ids with the tag
+
+  function formatMoney(cents) {
+    // Shopify stores prices in cents
+    // Adjust currency symbol/format for your store
+    return '\u20B9' + (cents / 100).toLocaleString('en-IN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  }
+
+  function loadCartData() {
+    fetch('/cart.js')
+      .then(function(r) { return r.json(); })
+      .then(function(cart) {
+        var fetches = cart.items.map(function(item) {
+          // Fetch full product data to check tags
+          return fetch('/products/' + item.handle + '.js')
+            .then(function(r) { return r.json(); })
+            .then(function(product) {
+              if (product.tags && product.tags.indexOf(CONFIG.targetTag) !== -1) {
+                // Find compare_at_price for this variant
+                var variant = product.variants.find(function(v) {
+                  return v.id === item.variant_id;
+                });
+                if (variant && variant.compare_at_price > variant.price) {
+                  originalPriceMap[item.variant_id] = variant.compare_at_price;
+                  originalPriceMap[item.key] = variant.compare_at_price;
+                  targetProductIds.push(item.product_id);
+                }
+              }
+            });
+        });
+        return Promise.all(fetches);
+      })
+      .then(function() {
+        console.log('[OriginalPrice] Loaded price map:', originalPriceMap);
+        observeGokwik();
+      })
+      .catch(function(e) {
+        console.warn('[OriginalPrice] Could not load cart data:', e);
+      });
+  }
+
+  // ──────────────────────────────────────────────────
+  // STEP 2: Watch GoKwik DOM with MutationObserver
+  // ──────────────────────────────────────────────────
+  function observeGokwik() {
+    var observer = new MutationObserver(function(mutations) {
+      mutations.forEach(function(mutation) {
+        if (mutation.addedNodes.length > 0) {
+          applyPriceOverrides();
+        }
+      });
+    });
+
+    // Watch the whole document body since GoKwik may inject anywhere
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+
+    // Also run immediately in case GoKwik is already rendered
+    applyPriceOverrides();
+  }
+
+  // ──────────────────────────────────────────────────
+  // STEP 3: Override prices in GoKwik's rendered DOM
+  // ──────────────────────────────────────────────────
+  function applyPriceOverrides() {
+    if (Object.keys(originalPriceMap).length === 0) return;
+
+    // Find GoKwik cart items — they usually have data-variant-id or data-product-id
+    var gkItems = document.querySelectorAll(
+      '[data-variant-id], [data-product-id], [data-item-key]'
+    );
+
+    gkItems.forEach(function(item) {
+      var variantId = parseInt(item.getAttribute('data-variant-id'));
+      var productId = parseInt(item.getAttribute('data-product-id'));
+      var itemKey   = item.getAttribute('data-item-key');
+
+      var compareAt = originalPriceMap[variantId]
+                   || originalPriceMap[itemKey]
+                   || null;
+
+      if (!compareAt) return;
+
+      // Already overridden — skip to avoid infinite loop
+      if (item.getAttribute('data-gk-price-overridden') === 'true') return;
+      item.setAttribute('data-gk-price-overridden', 'true');
+
+      // Replace sale price text with compare_at_price
+      CONFIG.salePriceSelectors.forEach(function(selector) {
+        var priceEl = item.querySelector(selector);
+        if (priceEl) {
+          priceEl.textContent = formatMoney(compareAt);
+          priceEl.style.textDecoration = 'none';
+          priceEl.style.color = 'inherit';
+        }
+      });
+
+      // Hide compare-at (now redundant since we’re showing it as main price)
+      CONFIG.compareAtSelectors.forEach(function(selector) {
+        var el = item.querySelector(selector);
+        if (el) el.style.display = 'none';
+      });
+
+      // Hide discount badges
+      CONFIG.badgeSelectors.forEach(function(selector) {
+        var el = item.querySelector(selector);
+        if (el) el.style.display = 'none';
+      });
+    });
+  }
+
+  // Start after DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', loadCartData);
+  } else {
+    loadCartData();
+  }
+
+  // Also reload when cart changes (e.g. product added)
+  document.addEventListener('cart:updated', loadCartData);
+  document.addEventListener('gk:cart:updated', loadCartData);
+
+})();
+</script>
