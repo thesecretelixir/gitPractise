@@ -1,0 +1,50 @@
+/*
+  STEP 2: Add this CSS to your theme.
+  Option A: Paste into Assets > base.css (or theme.css)
+  Option B: In Shopify Admin > Online Store > Themes > Edit Code
+            Open assets/base.css and paste at the bottom.
+
+  This targets ONLY the collection page 'buy-any-product-99'.
+  The body class 'collection-original-price-only' is added via Step 1 (Liquid).
+*/
+
+/* ─────────────────────────────────────────────────────────
+   COLLECTION: buy-any-product-99
+   Show ONLY compare-at price. Hide sale price & badges.
+   ───────────────────────────────────────────────────────── */
+
+/* Hide the sale price (the discounted price) on product cards */
+.collection-original-price-only .price__sale .price-item--sale,
+.collection-original-price-only .price-item--sale {
+  display: none !important;
+}
+
+/* Show the compare-at (original) price as if it's the regular price */
+.collection-original-price-only .price__sale .price-item--regular {
+  text-decoration: none !important;   /* remove strikethrough */
+  color: inherit !important;          /* make it look like normal price */
+  font-size: inherit !important;
+  font-weight: inherit !important;
+}
+
+/* Hide the entire sale wrapper and show compare-at cleanly */
+.collection-original-price-only .price__sale {
+  flex-direction: row !important;
+}
+
+/* Hide Sale badge / % off badge on product cards */
+.collection-original-price-only .badge--sale,
+.collection-original-price-only .price__badge-sale,
+.collection-original-price-only .card__badge .badge,
+.collection-original-price-only [class*="badge-sale"],
+.collection-original-price-only [class*="sale-badge"],
+.collection-original-price-only .product-card__badge {
+  display: none !important;
+}
+
+/* Hide percentage off labels (e.g. "-30%", "30% off") */
+.collection-original-price-only .price__badge,
+.collection-original-price-only .badge[class*="sale"],
+.collection-original-price-only .price-badge {
+  display: none !important;
+}

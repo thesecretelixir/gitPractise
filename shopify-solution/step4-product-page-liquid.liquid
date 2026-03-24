@@ -1,0 +1,40 @@
+{%- comment -%}
+  STEP 4 (OPTIONAL — for product page when navigated from the collection)
+
+  On a product page, Shopify loses the collection context.
+  To also hide the sale price on the PRODUCT PAGE when user
+  comes from 'buy-any-product-99', use this JavaScript approach.
+
+  PASTE this snippet inside your layout/theme.liquid just before </body>
+  or include it in your sections/main-product.liquid.
+{%- endcomment -%}
+
+<script>
+  // Detect if user navigated from 'buy-any-product-99' collection
+  // or if the product page URL contains the collection handle as referrer
+  (function() {
+    var referrer = document.referrer || '';
+    var urlParams = new URLSearchParams(window.location.search);
+    var fromCollection = urlParams.get('from_collection') || '';
+
+    var isTargetCollection =
+      referrer.includes('/collections/buy-any-product-99') ||
+      fromCollection === 'buy-any-product-99' ||
+      sessionStorage.getItem('originalPriceCollection') === 'buy-any-product-99';
+
+    // Save to session so it persists on product page navigation
+    if (referrer.includes('/collections/buy-any-product-99')) {
+      sessionStorage.setItem('originalPriceCollection', 'buy-any-product-99');
+    }
+
+    if (isTargetCollection && document.body.classList.contains('template-product')) {
+      document.body.classList.add('collection-original-price-only');
+    }
+  })();
+</script>
+
+{%- comment -%}
+  NOTE: The CSS from step2-collection-original-price.css will handle
+  hiding sale prices / badges once the body class is applied.
+  You do NOT need separate CSS here.
+{%- endcomment -%}

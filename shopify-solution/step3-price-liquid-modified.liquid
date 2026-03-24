@@ -1,0 +1,96 @@
+{%- comment -%}
+  STEP 3 (OPTIONAL — for Liquid-level control)
+
+  This is a MODIFIED version of snippets/price.liquid (Dawn theme).
+  If you want to control the price display at the Liquid level instead of CSS,
+  replace your existing snippets/price.liquid with this version.
+
+  KEY CHANGE:
+  When the current collection is 'buy-any-product-99',
+  we display compare_at_price as the main price and skip the sale UI entirely.
+
+  HOW TO USE:
+  1. In Shopify Admin > Online Store > Themes > Edit Code
+  2. Open snippets/price.liquid
+  3. Replace entire file content with this code.
+{%- endcomment -%}
+
+{%- liquid
+  assign show_original_price_only = false
+  if collection.handle == 'buy-any-product-99'
+    assign show_original_price_only = true
+  endif
+
+  if target == 'product'
+    assign compare_at_price = product.selected_or_first_available_variant.compare_at_price
+    assign price = product.selected_or_first_available_variant.price
+  else
+    assign compare_at_price = card_product.compare_at_price
+    assign price = card_product.price
+  endif
+
+  assign on_sale = false
+  if compare_at_price > price
+    assign on_sale = true
+  endif
+-%}
+
+{%- if show_original_price_only -%}
+  {%- comment -%}
+    ── SPECIAL MODE: buy-any-product-99 collection ──
+    Always show the compare_at_price as the displayed price.
+    If there's no compare_at_price, fall back to regular price.
+    No sale badge, no % off, no crossed-out price.
+  {%- endcomment -%}
+  <div class="price">
+    <div class="price__container">
+      <div class="price__regular">
+        <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+        <span class="price-item price-item--regular">
+          {%- if on_sale -%}
+            {{ compare_at_price | money }}
+          {%- else -%}
+            {{ price | money }}
+          {%- endif -%}
+        </span>
+      </div>
+    </div>
+  </div>
+
+{%- else -%}
+  {%- comment -%}
+    ── NORMAL MODE: all other collections / pages ──
+    Standard Dawn price display with sale price, compare-at, and badge.
+  {%- endcomment -%}
+  <div class="price{% if on_sale %} price--on-sale{% endif %}">
+    <div class="price__container">
+      {%- if on_sale -%}
+        <div class="price__sale">
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
+          <span class="price-item price-item--sale price-item--last">
+            {{ price | money }}
+          </span>
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+          <span class="price-item price-item--regular">
+            {{ compare_at_price | money }}
+          </span>
+        </div>
+        <span class="badge price__badge-sale color-{{ settings.sale_badge_color_scheme }}">
+          {%- if settings.show_percentage_savings -%}
+            {%- assign savings_percent = compare_at_price | minus: price | times: 100 | divided_by: compare_at_price | round -%}
+            -{{ savings_percent }}%
+          {%- else -%}
+            {{ 'products.product.on_sale' | t }}
+          {%- endif -%}
+        </span>
+      {%- else -%}
+        <div class="price__regular">
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+          <span class="price-item price-item--regular">
+            {{ price | money }}
+          </span>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}

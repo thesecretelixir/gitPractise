@@ -1,0 +1,23 @@
+{{- '/* STEP 1: Add this class to your <body> tag in layout/theme.liquid */'
+-}}
+
+{%- comment -%}
+  In layout/theme.liquid, find your opening <body> tag and add this class:
+  It will look something like:
+    <body class="...">
+  Add the snippet below INSIDE the class attribute.
+{%- endcomment -%}
+
+{%- comment -%} PASTE THIS INSIDE YOUR BODY CLASS ATTRIBUTE: {%- endcomment -%}
+{% if collection.handle == 'buy-any-product-99' %}collection-original-price-only{% endif %}
+
+
+{%- comment -%}
+  FULL EXAMPLE of what your body tag might look like after the change:
+
+  <body
+    id="shopify-section-body"
+    class="template-{{ request.page_type }}
+      {% if collection.handle == 'buy-any-product-99' %}collection-original-price-only{% endif %}"
+  >
+{%- endcomment -%}
