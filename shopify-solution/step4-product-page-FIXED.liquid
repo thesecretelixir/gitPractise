@@ -1,0 +1,64 @@
+{%- comment -%}
+  STEP 4 (FIXED) — Product page: show original price when coming from buy-any-product-99
+
+  The previous approach ran too late causing a flash of the sale price.
+  This version uses TWO script blocks:
+
+  SCRIPT A — goes inside <head>, before any CSS/render.
+              Reads sessionStorage and adds body class IMMEDIATELY.
+
+  SCRIPT B — goes before </body>.
+              Uses Liquid server-side to set/clear sessionStorage reliably.
+
+  HOW TO IMPLEMENT:
+  1. Open layout/theme.liquid in Edit Code
+  2. Add SCRIPT A inside <head> (near the top, before theme CSS links)
+  3. Add SCRIPT B just before </body>
+  4. REMOVE the old step4 script if you added it previously
+{%- endcomment -%}
+
+
+{%- comment -%} =========================================================
+  SCRIPT A — Paste this inside <head> BEFORE your CSS <link> tags
+  This prevents flash of sale price by applying the class before render
+========================================================= {%- endcomment -%}
+<script>
+  (function() {
+    if (sessionStorage.getItem('from_collection') === 'buy-any-product-99') {
+      // Apply class to <html> immediately, before CSS paints
+      document.documentElement.classList.add('collection-original-price-only');
+    }
+  })();
+</script>
+
+
+{%- comment -%} =========================================================
+  SCRIPT B — Paste this just before </body>
+  Uses Liquid to make sessionStorage logic server-aware
+========================================================= {%- endcomment -%}
+<script>
+  (function() {
+    {% if collection.handle == 'buy-any-product-99' %}
+      // We are ON the collection page — store it for the next page
+      sessionStorage.setItem('from_collection', 'buy-any-product-99');
+
+      // Also intercept link clicks (for AJAX/SPA themes like Dawn)
+      document.addEventListener('click', function(e) {
+        var link = e.target.closest('a[href*="/products/"]');
+        if (link) {
+          sessionStorage.setItem('from_collection', 'buy-any-product-99');
+        }
+      });
+
+    {% elsif request.page_type == 'product' %}
+      // We are on a product page — keep the session alive, apply the class
+      if (sessionStorage.getItem('from_collection') === 'buy-any-product-99') {
+        document.documentElement.classList.add('collection-original-price-only');
+      }
+
+    {% else %}
+      // Any other page — clear the session
+      sessionStorage.removeItem('from_collection');
+    {% endif %}
+  })();
+</script>
