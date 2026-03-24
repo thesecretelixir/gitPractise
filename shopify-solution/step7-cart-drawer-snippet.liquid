@@ -1,0 +1,39 @@
+{%- comment -%}
+  STEP D — Cart Drawer: Show compare-at price for tagged products
+
+  In Dawn theme, open: sections/cart-drawer.liquid
+  Find the line item price rendering.
+  It usually looks like:
+
+    {% render 'price', product: item.product, use_variant: true, show_badges: false %}
+
+  REPLACE it with the block below.
+{%- endcomment -%}
+
+{% comment %} PASTE THIS in place of your cart drawer item price {% endcomment %}
+{%- assign drawer_product = item.product -%}
+{%- assign drawer_compare_at = item.variant.compare_at_price -%}
+{%- assign drawer_price = item.variant.price -%}
+{%- assign drawer_on_sale = false -%}
+{%- if drawer_compare_at > drawer_price -%}
+  {%- assign drawer_on_sale = true -%}
+{%- endif -%}
+
+{%- if drawer_product.tags contains 'original-price-only' -%}
+  <div class="price">
+    <div class="price__container">
+      <div class="price__regular">
+        <span class="price-item price-item--regular">
+          {%- if drawer_on_sale and drawer_compare_at > 0 -%}
+            {{ drawer_compare_at | money }}
+          {%- else -%}
+            {{ drawer_price | money }}
+          {%- endif -%}
+        </span>
+      </div>
+    </div>
+  </div>
+
+{%- else -%}
+  {%- render 'price', product: item.product, use_variant: true, show_badges: false -%}
+{%- endif -%}

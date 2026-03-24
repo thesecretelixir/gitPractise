@@ -1,0 +1,47 @@
+{%- comment -%}
+  STEP C — Cart Page: Show compare-at price for tagged products
+
+  In Dawn theme, open: sections/main-cart-items.liquid
+  Find the block that renders the cart line item price.
+  It typically looks like:
+
+    <div class="cart-item__price">
+      {% render 'price', product: item.product, use_variant: true, show_badges: false %}
+    </div>
+
+  REPLACE that block with the code below.
+  This checks if the product has the 'original-price-only' tag.
+
+  NOTE: The variable 'item' is the cart line item in Dawn's cart template.
+        It may be called 'line_item' in some themes — check your template.
+{%- endcomment -%}
+
+{% comment %} PASTE THIS in place of your cart item price block in main-cart-items.liquid {% endcomment %}
+<div class="cart-item__price">
+  {%- assign cart_item_product = item.product -%}
+  {%- assign cart_compare_at = item.variant.compare_at_price -%}
+  {%- assign cart_price = item.variant.price -%}
+  {%- assign cart_on_sale = false -%}
+  {%- if cart_compare_at > cart_price -%}
+    {%- assign cart_on_sale = true -%}
+  {%- endif -%}
+
+  {%- if cart_item_product.tags contains 'original-price-only' -%}
+    <div class="price">
+      <div class="price__container">
+        <div class="price__regular">
+          <span class="price-item price-item--regular">
+            {%- if cart_on_sale and cart_compare_at > 0 -%}
+              {{ cart_compare_at | money }}
+            {%- else -%}
+              {{ cart_price | money }}
+            {%- endif -%}
+          </span>
+        </div>
+      </div>
+    </div>
+
+  {%- else -%}
+    {%- render 'price', product: item.product, use_variant: true, show_badges: false -%}
+  {%- endif -%}
+</div>

@@ -1,0 +1,113 @@
+{%- comment -%}
+  COMPLETE SOLUTION — Show Compare-At Price Everywhere
+  Works on: Collection Cards, Product Page, Cart Drawer, Cart Page
+  Does NOT work on: Checkout (Shopify controls that, Plus plan needed)
+
+  OVERVIEW OF APPROACH:
+  ─────────────────────────────────────────────
+  1. Tag all products in your collection with: original-price-only
+  2. Update snippets/price.liquid to check that tag
+  3. Update sections/main-cart-items.liquid for cart page
+  4. Update sections/cart-drawer.liquid for cart drawer
+  The checkout page CANNOT be modified on standard Shopify plans.
+{%- endcomment -%}
+
+
+{%- comment -%} ==========================================================
+  STEP A — Tag your products in Shopify Admin
+
+  1. Go to Shopify Admin > Products
+  2. Select all products that are in your 'buy-any-product-99' collection
+  3. Click 'Actions' > 'Add tags'
+  4. Add tag: original-price-only
+  5. Save
+
+  This tag is the bridge that lets price.liquid know the product
+  belongs to your special collection — even in cart, product page, etc.
+========================================================== {%- endcomment -%}
+
+
+{%- comment -%} ==========================================================
+  STEP B — Replace snippets/price.liquid with this content
+  Handles: Collection cards, Product page
+========================================================== {%- endcomment -%}
+
+{% comment %} FILE: snippets/price.liquid {% endcomment %}
+{%- liquid
+  assign show_original_price_only = false
+
+  if collection.handle == 'buy-any-product-99'
+    assign show_original_price_only = true
+  endif
+
+  if product.tags contains 'original-price-only'
+    assign show_original_price_only = true
+  endif
+
+  if card_product and card_product.tags contains 'original-price-only'
+    assign show_original_price_only = true
+  endif
+
+  if target == 'product'
+    assign compare_at_price = product.selected_or_first_available_variant.compare_at_price
+    assign price = product.selected_or_first_available_variant.price
+  else
+    assign compare_at_price = card_product.compare_at_price
+    assign price = card_product.price
+  endif
+
+  assign on_sale = false
+  if compare_at_price > price
+    assign on_sale = true
+  endif
+-%}
+
+{%- if show_original_price_only -%}
+  <div class="price">
+    <div class="price__container">
+      <div class="price__regular">
+        <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+        <span class="price-item price-item--regular">
+          {%- if on_sale and compare_at_price > 0 -%}
+            {{ compare_at_price | money }}
+          {%- else -%}
+            {{ price | money }}
+          {%- endif -%}
+        </span>
+      </div>
+    </div>
+  </div>
+
+{%- else -%}
+  <div class="price{% if on_sale %} price--on-sale{% endif %}">
+    <div class="price__container">
+      {%- if on_sale -%}
+        <div class="price__sale">
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.sale_price' | t }}</span>
+          <span class="price-item price-item--sale price-item--last">
+            {{ price | money }}
+          </span>
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+          <span class="price-item price-item--regular">
+            {{ compare_at_price | money }}
+          </span>
+        </div>
+        <span class="badge price__badge-sale color-{{ settings.sale_badge_color_scheme }}">
+          {%- if settings.show_percentage_savings -%}
+            {%- assign savings_percent = compare_at_price | minus: price | times: 100 | divided_by: compare_at_price | round -%}
+            -{{ savings_percent }}%
+          {%- else -%}
+            {{ 'products.product.on_sale' | t }}
+          {%- endif -%}
+        </span>
+      {%- else -%}
+        <div class="price__regular">
+          <span class="visually-hidden visually-hidden--inline">{{ 'products.product.price.regular_price' | t }}</span>
+          <span class="price-item price-item--regular">
+            {{ price | money }}
+          </span>
+        </div>
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
