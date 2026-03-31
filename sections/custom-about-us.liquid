@@ -128,30 +128,32 @@
   <section class="about-section about-targeted">
     <div class="about-container about-container--narrow">
 
-      {%- if section.settings.targeted_subtitle != blank -%}
-        <p class="about-targeted__subtitle">{{ section.settings.targeted_subtitle }}</p>
-      {%- endif -%}
-
-      {%- if section.settings.targeted_title_line1 != blank or section.settings.targeted_title_line2 != blank -%}
-        <h2 class="about-targeted__title">
-          {%- if section.settings.targeted_title_line1 != blank -%}
-            <span class="font-accent">{{ section.settings.targeted_title_line1 }}</span>
-          {%- endif -%}
-          {%- if section.settings.targeted_title_line2 != blank -%}
-            <br><em class="font-italic">{{ section.settings.targeted_title_line2 }}</em>
-          {%- endif -%}
-        </h2>
-      {%- endif -%}
-
-      <div class="about-targeted__dots" aria-hidden="true">
-        <span class="dot dot--pink"></span>
-        <span class="dot dot--navy"></span>
-        <span class="dot dot--blue"></span>
-        <span class="dot dot--green"></span>
-      </div>
-
       {%- if section.settings.targeted_image != blank -%}
         <div class="about-targeted__image-wrap">
+
+          {%- comment -%} Content overlay on top of the image {%- endcomment -%}
+          <div class="about-targeted__overlay">
+            {%- if section.settings.targeted_subtitle != blank -%}
+              <p class="about-targeted__subtitle">{{ section.settings.targeted_subtitle }}</p>
+            {%- endif -%}
+            {%- if section.settings.targeted_title_line1 != blank or section.settings.targeted_title_line2 != blank -%}
+              <h2 class="about-targeted__title">
+                {%- if section.settings.targeted_title_line1 != blank -%}
+                  <span class="font-accent">{{ section.settings.targeted_title_line1 }}</span>
+                {%- endif -%}
+                {%- if section.settings.targeted_title_line2 != blank -%}
+                  <br><em class="font-italic">{{ section.settings.targeted_title_line2 }}</em>
+                {%- endif -%}
+              </h2>
+            {%- endif -%}
+            <div class="about-targeted__dots" aria-hidden="true">
+              <span class="dot dot--pink"></span>
+              <span class="dot dot--navy"></span>
+              <span class="dot dot--blue"></span>
+              <span class="dot dot--green"></span>
+            </div>
+          </div>
+
           <img
             src="{{ section.settings.targeted_image | img_url: '1200x' }}"
             alt="{{ section.settings.targeted_image.alt | escape }}"
@@ -159,6 +161,27 @@
             width="1200"
             class="about-targeted__image"
           >
+        </div>
+      {%- else -%}
+        {%- comment -%} No image: render content normally {%- endcomment -%}
+        {%- if section.settings.targeted_subtitle != blank -%}
+          <p class="about-targeted__subtitle">{{ section.settings.targeted_subtitle }}</p>
+        {%- endif -%}
+        {%- if section.settings.targeted_title_line1 != blank or section.settings.targeted_title_line2 != blank -%}
+          <h2 class="about-targeted__title">
+            {%- if section.settings.targeted_title_line1 != blank -%}
+              <span class="font-accent">{{ section.settings.targeted_title_line1 }}</span>
+            {%- endif -%}
+            {%- if section.settings.targeted_title_line2 != blank -%}
+              <br><em class="font-italic">{{ section.settings.targeted_title_line2 }}</em>
+            {%- endif -%}
+          </h2>
+        {%- endif -%}
+        <div class="about-targeted__dots" aria-hidden="true">
+          <span class="dot dot--pink"></span>
+          <span class="dot dot--navy"></span>
+          <span class="dot dot--blue"></span>
+          <span class="dot dot--green"></span>
         </div>
       {%- endif -%}
 
