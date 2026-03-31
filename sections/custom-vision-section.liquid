@@ -1,0 +1,216 @@
+{% comment %}
+  Custom Vision Section
+  Two-column layout: Left Image | Right Content (Subtitle + Mixed-font Title + Description)
+  Mobile: Image → Subtitle → Title → Description
+{% endcomment %}
+
+{{ 'custom-vision-section.css' | asset_url | stylesheet_tag }}
+
+<style>
+  /*
+    @font-face declarations use asset_url so Shopify resolves CDN paths.
+    Upload to /assets:
+      CircularStd-Book.woff2 / .woff
+      CircularStd-Bold.woff2 / .woff
+      AccentItalic.woff2     / .woff  (e.g. PlayfairDisplay-Italic)
+    Skip these if already declared in another section on the same page.
+  */
+  @font-face {
+    font-family: 'CircularStd';
+    src: url('{{ "CircularStd-Book.woff2" | asset_url }}') format('woff2'),
+         url('{{ "CircularStd-Book.woff"  | asset_url }}') format('woff');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'CircularStd';
+    src: url('{{ "CircularStd-Bold.woff2" | asset_url }}') format('woff2'),
+         url('{{ "CircularStd-Bold.woff"  | asset_url }}') format('woff');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'AccentItalic';
+    src: url('{{ "AccentItalic.woff2" | asset_url }}') format('woff2'),
+         url('{{ "AccentItalic.woff"  | asset_url }}') format('woff');
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+  }
+</style>
+
+<section
+  class="vision-section"
+  style="
+    --vision-bg: {{ section.settings.background_color }};
+    --vision-padding-top: {{ section.settings.padding_top }}px;
+    --vision-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="vision-container">
+    <div class="vision-columns">
+
+      {%- comment -%} ── LEFT: Image ──────────────────────────────────────── {%- endcomment -%}
+      <div class="vision-col vision-col--media">
+        {%- if section.settings.image != blank -%}
+          <div class="vision-image-wrap">
+            <img
+              src="{{ section.settings.image | img_url: '800x' }}"
+              alt="{{ section.settings.image.alt | escape }}"
+              loading="lazy"
+              width="800"
+              class="vision-image"
+            >
+          </div>
+        {%- else -%}
+          <div class="vision-image-wrap vision-image-wrap--placeholder">
+            {{ 'image' | placeholder_svg_tag: 'vision-placeholder-svg' }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} ── RIGHT: Content ───────────────────────────────────── {%- endcomment -%}
+      <div class="vision-col vision-col--content">
+
+        {%- if section.settings.subtitle != blank -%}
+          <p class="vision-subtitle">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.title_line1 != blank or section.settings.title_line2 != blank -%}
+          <h2 class="vision-title">
+            {%- if section.settings.title_line1 != blank -%}
+              {%- comment -%} Line 1 uses the accent/italic font {%- endcomment -%}
+              <span class="vision-title__accent">{{ section.settings.title_line1 }}</span>
+            {%- endif -%}
+            {%- if section.settings.title_line2 != blank -%}
+              {%- comment -%} Line 2 uses Circular Std {%- endcomment -%}
+              <span class="vision-title__primary">{{ section.settings.title_line2 }}</span>
+            {%- endif -%}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.description != blank -%}
+          <div class="vision-description rte">
+            {{ section.settings.description }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank and section.settings.button_url != blank -%}
+          <a
+            href="{{ section.settings.button_url }}"
+            class="vision-btn"
+            {% if section.settings.button_open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+          >
+            {{- section.settings.button_label -}}
+          </a>
+        {%- endif -%}
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Custom Vision Section",
+  "tag": "section",
+  "class": "section-custom-vision",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background colour",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 64
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle (eyebrow)",
+      "default": "OUR VISION"
+    },
+    {
+      "type": "text",
+      "id": "title_line1",
+      "label": "Title — line 1 (accent / italic font)",
+      "info": "e.g. \"A world where every woman unapologetically claims her pleasure.\"",
+      "default": "A world where every woman unapologetically claims her pleasure."
+    },
+    {
+      "type": "text",
+      "id": "title_line2",
+      "label": "Title — line 2 (Circular Std font)",
+      "info": "Optional second line in the regular font. Leave blank to use only line 1.",
+      "default": ""
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>We envision a world where women no longer feel confused, hesitant, or held back when it comes to their bodies and pleasure is no longer treated as luxuries or afterthoughts. <strong>A place where they feel informed, confident, and fully in control of their health and pleasure.</strong></p>"
+    },
+    {
+      "type": "header",
+      "content": "Button (optional)"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "button_open_new_tab",
+      "label": "Open in new tab",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Vision Section"
+    }
+  ]
+}
+{% endschema %}

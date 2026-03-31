@@ -1,0 +1,228 @@
+/* ==========================================================================
+   Custom Vision Section — Styles
+   Supports: Desktop (≥1024px) | Tablet (768–1023px) | Mobile (≤767px)
+   ========================================================================== */
+
+/* ── Design tokens (mirrors custom-about-us.css; safe to redefine) ───────── */
+:root {
+  --vision-font-primary: 'CircularStd', 'Helvetica Neue', Arial, sans-serif;
+  --vision-font-accent:  'AccentItalic', Georgia, serif;
+
+  --vision-color-navy:   #1a2d5a;
+  --vision-color-blue:   #3a6fc4;
+  --vision-color-text:   #2b2b2b;
+  --vision-color-muted:  #6b6b6b;
+  --vision-color-white:  #ffffff;
+
+  --vision-radius:       16px;
+  --vision-shadow:       0 4px 24px rgba(0, 0, 0, 0.10);
+  --vision-max-width:    1200px;
+  --vision-gap:          5rem;
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+.vision-section *,
+.vision-section *::before,
+.vision-section *::after {
+  box-sizing: border-box;
+}
+
+.vision-section {
+  background-color: var(--vision-bg, var(--vision-color-white));
+  padding-top:    var(--vision-padding-top,    64px);
+  padding-bottom: var(--vision-padding-bottom, 64px);
+  padding-inline: 1.5rem;
+  font-family: var(--vision-font-primary);
+  color: var(--vision-color-text);
+}
+
+.vision-section img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* ── Container ───────────────────────────────────────────────────────────── */
+.vision-container {
+  max-width: var(--vision-max-width);
+  margin-inline: auto;
+}
+
+/* ── Two-column grid ─────────────────────────────────────────────────────── */
+.vision-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--vision-gap);
+  align-items: center;
+}
+
+/* ── LEFT — Image ────────────────────────────────────────────────────────── */
+.vision-col--media {
+  /* image column */
+}
+
+.vision-image-wrap {
+  border-radius: var(--vision-radius);
+  overflow: hidden;
+  box-shadow: var(--vision-shadow);
+  line-height: 0; /* collapse inline gap */
+}
+
+.vision-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-height: 540px;
+  border-radius: var(--vision-radius);
+}
+
+/* Placeholder when no image is set */
+.vision-image-wrap--placeholder {
+  background: #e8ecf4;
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vision-placeholder-svg {
+  width: 60%;
+  height: 60%;
+  opacity: .35;
+}
+
+/* ── RIGHT — Content ─────────────────────────────────────────────────────── */
+.vision-col--content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Subtitle / eyebrow */
+.vision-subtitle {
+  font-family: var(--vision-font-primary);
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--vision-color-muted);
+  margin: 0;
+}
+
+/* Title — two-line mixed-font heading */
+.vision-title {
+  font-size: clamp(1.875rem, 3.5vw, 3rem);
+  line-height: 1.15;
+  color: var(--vision-color-navy);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+
+/* Line 1 — accent / italic (e.g. script serif) */
+.vision-title__accent {
+  font-family: var(--vision-font-accent);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--vision-color-navy);
+}
+
+/* Line 2 — Circular Std bold */
+.vision-title__primary {
+  font-family: var(--vision-font-primary);
+  font-weight: 700;
+  color: var(--vision-color-navy);
+}
+
+/* Description */
+.vision-description {
+  font-size: .9375rem;
+  line-height: 1.75;
+  color: var(--vision-color-text);
+  margin: 0;
+}
+
+.vision-description p { margin: 0 0 .75em; }
+.vision-description p:last-child { margin-bottom: 0; }
+
+.vision-description strong {
+  font-weight: 700;
+  color: var(--vision-color-navy);
+}
+
+/* Optional CTA button */
+.vision-btn {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: .5rem;
+  padding: .75rem 1.75rem;
+  background: var(--vision-color-navy);
+  color: var(--vision-color-white);
+  font-family: var(--vision-font-primary);
+  font-size: .9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 100px;
+  transition: background .2s, transform .2s;
+}
+
+.vision-btn:hover {
+  background: var(--vision-color-blue);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   TABLET — 768px to 1023px
+   ========================================================================== */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --vision-gap: 3rem;
+  }
+
+  .vision-image {
+    max-height: 420px;
+  }
+}
+
+/* ==========================================================================
+   MOBILE — up to 767px
+   Mobile order: Image → Subtitle → Title → Description
+   ========================================================================== */
+@media screen and (max-width: 767px) {
+  .vision-section {
+    padding-inline: 1rem;
+  }
+
+  /*
+    Switch grid to flex-column and use display:contents on each column
+    so the individual children can be ordered independently.
+  */
+  .vision-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  /* Dissolve column wrappers so children join the parent flex flow */
+  .vision-col--media,
+  .vision-col--content {
+    display: contents;
+  }
+
+  /* Explicit mobile order: 1-Image  2-Subtitle  3-Title  4-Description  5-Button */
+  .vision-image-wrap       { order: 1; display: block; }
+  .vision-subtitle         { order: 2; }
+  .vision-title            { order: 3; }
+  .vision-description      { order: 4; }
+  .vision-btn              { order: 5; align-self: flex-start; }
+
+  .vision-image {
+    max-height: 320px;
+    border-radius: var(--vision-radius);
+  }
+
+  .vision-title {
+    font-size: 1.625rem;
+  }
+}
