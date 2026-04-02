@@ -1,0 +1,315 @@
+/* ==========================================================================
+   Custom Vision Section — Styles
+   Supports: Desktop (≥1024px) | Tablet (768–1023px) | Mobile (≤767px)
+   ========================================================================== */
+
+/* ── Design tokens ───────────────────────────────────────────────────────── */
+:root {
+  --vision-font-primary: 'CircularStd', 'Helvetica Neue', Arial, sans-serif;
+  --vision-font-accent:  'FontSpringbolditalic', Georgia, serif;
+
+  --vision-color-navy:   #01568C;
+  --vision-color-blue:   #01568C;
+  --vision-color-text:   #2b2b2b;
+  --vision-color-muted:  #958D8D;
+  --vision-color-white:  #ffffff;
+
+  --vision-radius:       16px;
+  --vision-shadow:       0 4px 24px rgba(0, 0, 0, 0.10);
+  --vision-max-width:    1200px;
+  --vision-gap:          5rem;
+
+  /* Polaroid tokens */
+  --polaroid-bg:         #ffffff;
+  --polaroid-border:     #01568C;
+  --polaroid-border-w:   6px;
+  --polaroid-bottom-h:   56px;        /* thick bottom "label" area */
+  --polaroid-tape-bg:    rgba(240, 230, 190, 0.80);
+  --polaroid-tape-w:     56px;
+  --polaroid-tape-h:     22px;
+  --polaroid-shadow:     0 8px 32px rgba(0, 0, 0, 0.18);
+  --polaroid-rotate-l:   -6deg;
+  --polaroid-rotate-r:    5deg;
+  --polaroid-overlap:    -40px;       /* negative margin so cards overlap slightly */
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+.vision-section *,
+.vision-section *::before,
+.vision-section *::after {
+  box-sizing: border-box;
+}
+
+.vision-section {
+  background-color: var(--vision-bg, var(--vision-color-white));
+  padding-top:    var(--vision-padding-top,    64px);
+  padding-bottom: var(--vision-padding-bottom, 64px);
+  padding-inline: 1.5rem;
+  font-family: var(--vision-font-primary);
+  color: var(--vision-color-text);
+}
+
+/* ── Container ───────────────────────────────────────────────────────────── */
+.vision-container {
+  max-width: var(--vision-max-width);
+  margin-inline: auto;
+}
+
+/* ── Two-column grid ─────────────────────────────────────────────────────── */
+.vision-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--vision-gap);
+  align-items: center;
+}
+
+/* ==========================================================================
+   POLAROID CARDS — Left column
+   ========================================================================== */
+
+/* Outer wrapper: gives enough room for the rotated cards + tape overflow */
+.polaroid-wrap {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 0;                      /* overlap is handled via margin */
+  padding: 3rem 1rem 2rem;     /* top room for tape; bottom room for shadow */
+  position: relative;
+}
+
+/* ── Single card shell ───────────────────────────────────────────────────── */
+.polaroid-card {
+  position: relative;
+  background: var(--polaroid-bg);
+  border: var(--polaroid-border-w) solid var(--polaroid-border);
+  border-radius: 4px;
+  box-shadow: var(--polaroid-shadow);
+  padding: 0 0 var(--polaroid-bottom-h) 0;   /* bottom padding = label area */
+  width: 220px;
+  flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(.34,1.56,.64,1),
+              box-shadow 0.35s ease;
+  cursor: pointer;
+}
+
+.polaroid-card--left {
+  transform: rotate(var(--polaroid-rotate-l));
+  z-index: 1;
+  margin-right: var(--polaroid-overlap);
+}
+
+.polaroid-card--right {
+  transform: rotate(var(--polaroid-rotate-r));
+  z-index: 2;
+}
+
+/* Hover: level out + lift */
+.polaroid-card:hover {
+  transform: rotate(0deg) scale(1.05);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.26);
+  z-index: 3;
+}
+
+/* ── Tape ────────────────────────────────────────────────────────────────── */
+.polaroid-tape {
+  position: absolute;
+  top: calc(-1 * var(--polaroid-tape-h) / 2);
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--polaroid-tape-w);
+  height: var(--polaroid-tape-h);
+  background: var(--polaroid-tape-bg);
+  border-radius: 2px;
+  z-index: 4;
+  /* subtle texture lines */
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 4px,
+    rgba(180, 160, 100, 0.20) 4px,
+    rgba(180, 160, 100, 0.20) 5px
+  );
+}
+
+/* ── Media area (video / placeholder) ───────────────────────────────────── */
+.polaroid-frame {
+  width: 100%;
+  aspect-ratio: 3 / 4;        /* portrait frame — tweak as needed */
+  overflow: hidden;
+  background: #f0f0f0;
+  position: relative;
+}
+
+.polaroid-media {
+  width: 100%;
+  height: 100%;
+}
+
+.polaroid-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Placeholder when no video is set */
+.polaroid-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e8ecf4;
+}
+
+.polaroid-placeholder-svg {
+  width: 60%;
+  height: 60%;
+  opacity: 0.35;
+}
+
+/* ==========================================================================
+   RIGHT — Content
+   ========================================================================== */
+.vision-col--content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Subtitle / eyebrow */
+.vision-subtitle {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--vision-color-muted);
+  margin: 0;
+}
+
+/* Title */
+.vision-title {
+  font-size: 50px;
+  line-height: 0.96;
+  color: var(--vision-color-navy);
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.vision-title__accent {
+  font-family: var(--vision-font-primary);
+  font-weight: 400;
+  color: var(--vision-color-navy);
+}
+
+.vision-title__primary {
+  font-family: var(--vision-font-accent);
+  font-style: italic;
+  font-weight: 700;
+  color: var(--vision-color-navy);
+}
+
+/* Description */
+.vision-description {
+  font-size: 20px;
+  line-height: 27px;
+  color: var(--vision-color-text);
+  letter-spacing: -0.02em;
+}
+
+.vision-description p             { margin: 0 0 0.75em; }
+.vision-description p:last-child  { margin-bottom: 0; }
+.vision-description strong        { font-weight: 700; color: var(--vision-color-navy); }
+
+/* CTA button */
+.vision-btn {
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  background: var(--vision-color-navy);
+  color: var(--vision-color-white);
+  font-family: var(--vision-font-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 100px;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.vision-btn:hover {
+  background: var(--vision-color-blue);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   TABLET — 768px to 1023px
+   ========================================================================== */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+  :root {
+    --vision-gap: 3rem;
+    --polaroid-overlap: -28px;
+  }
+
+  .polaroid-card {
+    width: 180px;
+  }
+}
+
+/* ==========================================================================
+   MOBILE — up to 767px
+   Mobile order: Cards → Subtitle → Title → Description → Button
+   ========================================================================== */
+@media screen and (max-width: 767px) {
+  .vision-section {
+    padding-inline: 1rem;
+  }
+
+  .vision-columns {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  /* Dissolve column wrappers so children join the parent flex flow */
+  .vision-col--media,
+  .vision-col--content {
+    display: contents;
+  }
+
+  /* Explicit mobile order */
+  .polaroid-wrap    { order: 1; display: flex; width: 100%; }
+  .vision-subtitle  { order: 2; }
+  .vision-title     { order: 3; }
+  .vision-description { order: 4; }
+  .vision-btn       { order: 5; align-self: flex-start; }
+
+  .polaroid-wrap {
+    justify-content: center;
+    padding: 2.5rem 0.5rem 1.5rem;
+  }
+
+  .polaroid-card {
+    width: 150px;
+  }
+
+  :root {
+    --polaroid-bottom-h: 44px;
+    --polaroid-overlap:  -24px;
+  }
+
+  .vision-title {
+    font-size: 1.625rem;
+  }
+
+  .vision-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .vision-description {
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+}

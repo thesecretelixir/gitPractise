@@ -1,0 +1,219 @@
+{% comment %}
+  Custom Vision Section
+  Two-column layout: Left Polaroid Video Cards | Right Content (Subtitle + Mixed-font Title + Description)
+  Mobile: Cards → Subtitle → Title → Description
+{% endcomment %}
+
+{{ 'custom-vision-section.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="vision-section"
+  style="
+    --vision-bg: {{ section.settings.background_color }};
+    --vision-padding-top: {{ section.settings.padding_top }}px;
+    --vision-padding-bottom: {{ section.settings.padding_bottom }}px;
+  "
+>
+  <div class="vision-container">
+    <div class="vision-columns">
+
+      {%- comment -%} ── LEFT: Polaroid Video Cards ──────────────────────── {%- endcomment -%}
+      <div class="vision-col vision-col--media">
+        <div class="polaroid-wrap">
+
+          {%- comment -%} Card 1 — rotated left {%- endcomment -%}
+          <div class="polaroid-card polaroid-card--left">
+            <div class="polaroid-tape"></div>
+            <div class="polaroid-frame">
+              <div class="polaroid-media">
+                {%- if section.settings.video_1 != blank -%}
+                  {{
+                    section.settings.video_1
+                    | video_tag:
+                      autoplay: true,
+                      muted: true,
+                      loop: true,
+                      playsinline: true,
+                      class: 'polaroid-video'
+                  }}
+                {%- else -%}
+                  <div class="polaroid-placeholder">
+                    {{ 'image' | placeholder_svg_tag: 'polaroid-placeholder-svg' }}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+
+          {%- comment -%} Card 2 — rotated right {%- endcomment -%}
+          <div class="polaroid-card polaroid-card--right">
+            <div class="polaroid-tape"></div>
+            <div class="polaroid-frame">
+              <div class="polaroid-media">
+                {%- if section.settings.video_2 != blank -%}
+                  {{
+                    section.settings.video_2
+                    | video_tag:
+                      autoplay: true,
+                      muted: true,
+                      loop: true,
+                      playsinline: true,
+                      class: 'polaroid-video'
+                  }}
+                {%- else -%}
+                  <div class="polaroid-placeholder">
+                    {{ 'image' | placeholder_svg_tag: 'polaroid-placeholder-svg' }}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {%- comment -%} ── RIGHT: Content ───────────────────────────────────── {%- endcomment -%}
+      <div class="vision-col vision-col--content">
+
+        {%- if section.settings.subtitle != blank -%}
+          <p class="vision-subtitle">{{ section.settings.subtitle }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.title_line1 != blank or section.settings.title_line2 != blank -%}
+          <h2 class="vision-title">
+            {%- if section.settings.title_line1 != blank -%}
+              <span class="vision-title__accent">{{ section.settings.title_line1 }}</span>
+            {%- endif -%}
+            {%- if section.settings.title_line2 != blank -%}
+              <span class="vision-title__primary">{{ section.settings.title_line2 }}</span>
+            {%- endif -%}
+          </h2>
+        {%- endif -%}
+
+        {%- if section.settings.description != blank -%}
+          <div class="vision-description rte">
+            {{ section.settings.description }}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank and section.settings.button_url != blank -%}
+          <a
+            href="{{ section.settings.button_url }}"
+            class="vision-btn"
+            {% if section.settings.button_open_new_tab %}target="_blank" rel="noopener noreferrer"{% endif %}
+          >
+            {{- section.settings.button_label -}}
+          </a>
+        {%- endif -%}
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Custom Vision Section",
+  "tag": "section",
+  "class": "section-custom-vision",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background colour",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 64
+    },
+    {
+      "type": "header",
+      "content": "Polaroid Videos"
+    },
+    {
+      "type": "video",
+      "id": "video_1",
+      "label": "Video — Card 1 (left)"
+    },
+    {
+      "type": "video",
+      "id": "video_2",
+      "label": "Video — Card 2 (right)"
+    },
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Subtitle (eyebrow)",
+      "default": "OUR VISION"
+    },
+    {
+      "type": "text",
+      "id": "title_line1",
+      "label": "Title — line 1 (accent / italic font)",
+      "info": "e.g. \"A world where every woman unapologetically claims her pleasure.\"",
+      "default": "A world where every woman unapologetically claims her pleasure."
+    },
+    {
+      "type": "text",
+      "id": "title_line2",
+      "label": "Title — line 2 (Circular Std font)",
+      "info": "Optional second line in the regular font. Leave blank to use only line 1."
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>We envision a world where women no longer feel confused, hesitant, or held back when it comes to their bodies and pleasure is no longer treated as luxuries or afterthoughts. <strong>A place where they feel informed, confident, and fully in control of their health and pleasure.</strong></p>"
+    },
+    {
+      "type": "header",
+      "content": "Button (optional)"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "button_open_new_tab",
+      "label": "Open in new tab",
+      "default": false
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom Vision Section"
+    }
+  ]
+}
+{% endschema %}
