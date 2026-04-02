@@ -152,7 +152,7 @@
 /* ── Tape ────────────────────────────────────────────────────────────────── */
 .polaroid-card__tape {
   position: absolute;
-  top: calc(var(--polaroid-tape-h) / -2);   /* straddles top edge */
+  top: calc(var(--polaroid-tape-h) / -2);
   left: 50%;
   transform: translateX(-50%);
   width: var(--polaroid-tape-w);
@@ -160,14 +160,6 @@
   background: var(--polaroid-tape-bg);
   border-radius: 3px;
   z-index: 4;
-  /* subtle vertical stripe texture mimicking tape */
-  background-image: repeating-linear-gradient(
-    90deg,
-    transparent,
-    transparent 5px,
-    rgba(180, 155, 90, 0.18) 5px,
-    rgba(180, 155, 90, 0.18) 6px
-  );
 }
 
 /* ── Video frame (portrait aspect) ──────────────────────────────────────── */
