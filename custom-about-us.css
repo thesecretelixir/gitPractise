@@ -30,17 +30,17 @@
   --about-container-narrow: 860px;
 
   /* ── Polaroid card tokens ──────────────────────────────────────────── */
-  --polaroid-bg:          #ffffff;
+  --polaroid-bg:           #ffffff;
   --polaroid-border-color: #01568C;
   --polaroid-border-width: 6px;
-  --polaroid-bottom-h:    52px;      /* thick bottom "label" strip */
-  --polaroid-shadow:      0 8px 32px rgba(0,0,0,.18);
-  --polaroid-tape-bg:     rgba(240, 230, 190, 0.85);
-  --polaroid-tape-w:      54px;
-  --polaroid-tape-h:      20px;
-  --polaroid-rotate-1:   -7deg;      /* card 1 leans left  */
-  --polaroid-rotate-2:    5deg;      /* card 2 leans right */
-  --polaroid-overlap:    -36px;      /* cards overlap slightly */
+  --polaroid-bottom-h:     52px;     /* thick bottom "label" strip */
+  --polaroid-shadow:       0 8px 32px rgba(0,0,0,.18);
+  --polaroid-tape-bg:      rgba(235, 220, 175, 0.90);
+  --polaroid-tape-w:       80px;
+  --polaroid-tape-h:       26px;
+  --polaroid-rotate-1:    -20deg;    /* card 1 fans left */
+  --polaroid-rotate-2:     15deg;    /* card 2 fans right */
+  --polaroid-card-gap:     16px;     /* gap between cards */
 }
 
 /* ── Reset / base ───────────────────────────────────────────────────────── */
@@ -120,7 +120,8 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  padding: 3rem 1rem 2rem;        /* top: tape clearance; bottom: shadow */
+  gap: var(--polaroid-card-gap);
+  padding: 4rem 2rem 3rem;        /* top: tape clearance; bottom: shadow */
   position: relative;
 }
 
@@ -131,20 +132,15 @@
   border: var(--polaroid-border-width) solid var(--polaroid-border-color);
   border-radius: 4px;
   box-shadow: var(--polaroid-shadow);
-  /* bottom padding creates the white "label" area below the video */
   padding-bottom: var(--polaroid-bottom-h);
-  width: 210px;
+  width: 240px;
   flex-shrink: 0;
-  transition: transform 0.35s cubic-bezier(.34, 1.56, .64, 1),
-              box-shadow 0.35s ease;
-  cursor: pointer;
 }
 
-/* Card rotations + overlap */
+/* Card rotations — fan apart, no overlap */
 .polaroid-card--1 {
   transform: rotate(var(--polaroid-rotate-1));
   z-index: 1;
-  margin-right: var(--polaroid-overlap);
 }
 
 .polaroid-card--2 {
@@ -152,31 +148,24 @@
   z-index: 2;
 }
 
-/* Hover: level out, lift, scale */
-.polaroid-card:hover {
-  transform: rotate(0deg) scale(1.05);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.26);
-  z-index: 10;
-}
-
 /* ── Tape ────────────────────────────────────────────────────────────────── */
 .polaroid-card__tape {
   position: absolute;
-  top: calc(var(--polaroid-tape-h) / -2);   /* straddles top border */
+  top: calc(var(--polaroid-tape-h) / -2);   /* straddles top edge */
   left: 50%;
   transform: translateX(-50%);
   width: var(--polaroid-tape-w);
   height: var(--polaroid-tape-h);
   background: var(--polaroid-tape-bg);
-  border-radius: 2px;
+  border-radius: 3px;
   z-index: 4;
-  /* subtle horizontal stripe texture */
+  /* subtle vertical stripe texture mimicking tape */
   background-image: repeating-linear-gradient(
     90deg,
     transparent,
-    transparent 4px,
-    rgba(180, 160, 100, 0.22) 4px,
-    rgba(180, 160, 100, 0.22) 5px
+    transparent 5px,
+    rgba(180, 155, 90, 0.18) 5px,
+    rgba(180, 155, 90, 0.18) 6px
   );
 }
 
@@ -600,10 +589,10 @@
   }
 
   :root {
-    --polaroid-bottom-h:  42px;
-    --polaroid-overlap:   -24px;
-    --polaroid-tape-w:    44px;
-    --polaroid-tape-h:    18px;
+    --polaroid-bottom-h: 42px;
+    --polaroid-tape-w:   58px;
+    --polaroid-tape-h:   20px;
+    --polaroid-card-gap: 10px;
   }
 
   .about-hero__main-title {
