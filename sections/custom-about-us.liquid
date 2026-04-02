@@ -5,51 +5,13 @@
 
 {{ 'custom-about-us.css' | asset_url | stylesheet_tag }}
 
-<style>
-  /*
-    @font-face declarations live here so asset_url Liquid filters work.
-    Upload the following font files to your theme's /assets folder:
-      CircularStd-Book.woff2 / CircularStd-Book.woff
-      CircularStd-Bold.woff2 / CircularStd-Bold.woff
-      AccentItalic.woff2     / AccentItalic.woff
-        (rename to match your chosen italic/script font, e.g. PlayfairDisplay-Italic)
-  */
-  @font-face {
-    font-family: 'CircularStd';
-    src: url('{{ "CircularStd-Book.woff2" | asset_url }}') format('woff2'),
-         url('{{ "CircularStd-Book.woff"  | asset_url }}') format('woff');
-    font-weight: 400;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'CircularStd';
-    src: url('{{ "CircularStd-Bold.woff2" | asset_url }}') format('woff2'),
-         url('{{ "CircularStd-Bold.woff"  | asset_url }}') format('woff');
-    font-weight: 700;
-    font-style: normal;
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'AccentItalic';
-    src: url('{{ "AccentItalic.woff2" | asset_url }}') format('woff2'),
-         url('{{ "AccentItalic.woff"  | asset_url }}') format('woff');
-    font-weight: 400;
-    font-style: italic;
-    font-display: swap;
-  }
-</style>
-
 <div class="about-us-page">
-
-  {%- comment -%} ============================================================
-    SECTION 1 — Hero: Main Title + Two-Column (GIF | Content)
+  {%- comment -%}
+    ============================================================
+    SECTION 1 — Hero: Main Title + Two-Column (Polaroid Videos | Content)
   {%- endcomment -%}
   <section class="about-section about-hero">
     <div class="about-container">
-
       {%- if section.settings.hero_main_title != blank -%}
         <h1 class="about-hero__main-title">
           {{ section.settings.hero_main_title }}
@@ -57,39 +19,54 @@
       {%- endif -%}
 
       <div class="about-hero__columns">
-        {%- comment -%} Left: GIF / animated frame {%- endcomment -%}
+        {%- comment -%} Left: Polaroid video cards {%- endcomment -%}
         <div class="about-hero__col about-hero__col--media">
           <div class="about-hero__polaroid-wrap">
-            {%- if section.settings.hero_gif_1 != blank -%}
-              <div class="polaroid polaroid--1">
-                <img
-                  src="{{ section.settings.hero_gif_1 | img_url: '600x' }}"
-                  alt="{{ section.settings.hero_gif_1.alt | escape }}"
-                  loading="lazy"
-                  width="600"
-                >
+
+            {%- comment -%} Card 1 — tilts left {%- endcomment -%}
+            <div class="polaroid-card polaroid-card--1">
+              <div class="polaroid-card__tape"></div>
+              <div class="polaroid-card__frame">
+                {%- if section.settings.hero_video_1 != blank -%}
+                  {{
+                    section.settings.hero_video_1
+                    | video_tag:
+                      autoplay: true,
+                      muted: true,
+                      loop: true,
+                      playsinline: true,
+                      class: 'polaroid-card__video'
+                  }}
+                {%- else -%}
+                  <div class="polaroid-card__placeholder">
+                    {{ 'image' | placeholder_svg_tag: 'polaroid-card__placeholder-svg' }}
+                  </div>
+                {%- endif -%}
               </div>
-            {%- endif -%}
-            {%- if section.settings.hero_gif_2 != blank -%}
-              <div class="polaroid polaroid--2">
-                <img
-                  src="{{ section.settings.hero_gif_2 | img_url: '600x' }}"
-                  alt="{{ section.settings.hero_gif_2.alt | escape }}"
-                  loading="lazy"
-                  width="600"
-                >
+            </div>
+
+            {%- comment -%} Card 2 — tilts right {%- endcomment -%}
+            <div class="polaroid-card polaroid-card--2">
+              <div class="polaroid-card__tape"></div>
+              <div class="polaroid-card__frame">
+                {%- if section.settings.hero_video_2 != blank -%}
+                  {{
+                    section.settings.hero_video_2
+                    | video_tag:
+                      autoplay: true,
+                      muted: true,
+                      loop: true,
+                      playsinline: true,
+                      class: 'polaroid-card__video'
+                  }}
+                {%- else -%}
+                  <div class="polaroid-card__placeholder">
+                    {{ 'image' | placeholder_svg_tag: 'polaroid-card__placeholder-svg' }}
+                  </div>
+                {%- endif -%}
               </div>
-            {%- endif -%}
-            {%- if section.settings.hero_gif_3 != blank -%}
-              <div class="polaroid polaroid--3">
-                <img
-                  src="{{ section.settings.hero_gif_3 | img_url: '600x' }}"
-                  alt="{{ section.settings.hero_gif_3.alt | escape }}"
-                  loading="lazy"
-                  width="600"
-                >
-              </div>
-            {%- endif -%}
+            </div>
+
           </div>
         </div>
 
@@ -118,42 +95,39 @@
           {%- endif -%}
         </div>
       </div>
-
     </div>
   </section>
 
-  {%- comment -%} ============================================================
+  {%- comment -%}
+    ============================================================
     SECTION 2 — Targeted Solutions: Subtitle | Title | Dots | Image
   {%- endcomment -%}
   <section class="about-section about-targeted">
     <div class="about-container about-container--narrow">
+       {%- if section.settings.targeted_subtitle != blank -%}
+        <p class="about-targeted__subtitle">{{ section.settings.targeted_subtitle }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.targeted_title_line1 != blank or section.settings.targeted_title_line2 != blank -%}
+        <h2 class="about-targeted__title">
+          {%- if section.settings.targeted_title_line1 != blank -%}
+            <span class="font-accent">{{ section.settings.targeted_title_line1 }}</span>
+          {%- endif -%}
+          {%- if section.settings.targeted_title_line2 != blank -%}
+            <br><em class="font-italic">{{ section.settings.targeted_title_line2 }}</em>
+          {%- endif -%}
+        </h2>
+      {%- endif -%}
+
+      <div class="about-targeted__dots" aria-hidden="true">
+        <span class="dot dot--pink"></span>
+        <span class="dot dot--navy"></span>
+        <span class="dot dot--blue"></span>
+        <span class="dot dot--green"></span>
+      </div>
 
       {%- if section.settings.targeted_image != blank -%}
         <div class="about-targeted__image-wrap">
-
-          {%- comment -%} Content overlay on top of the image {%- endcomment -%}
-          <div class="about-targeted__overlay">
-            {%- if section.settings.targeted_subtitle != blank -%}
-              <p class="about-targeted__subtitle">{{ section.settings.targeted_subtitle }}</p>
-            {%- endif -%}
-            {%- if section.settings.targeted_title_line1 != blank or section.settings.targeted_title_line2 != blank -%}
-              <h2 class="about-targeted__title">
-                {%- if section.settings.targeted_title_line1 != blank -%}
-                  <span class="font-accent">{{ section.settings.targeted_title_line1 }}</span>
-                {%- endif -%}
-                {%- if section.settings.targeted_title_line2 != blank -%}
-                  <br><em class="font-italic">{{ section.settings.targeted_title_line2 }}</em>
-                {%- endif -%}
-              </h2>
-            {%- endif -%}
-            <div class="about-targeted__dots" aria-hidden="true">
-              <span class="dot dot--pink"></span>
-              <span class="dot dot--navy"></span>
-              <span class="dot dot--blue"></span>
-              <span class="dot dot--green"></span>
-            </div>
-          </div>
-
           <img
             src="{{ section.settings.targeted_image | img_url: '1200x' }}"
             alt="{{ section.settings.targeted_image.alt | escape }}"
@@ -162,38 +136,17 @@
             class="about-targeted__image"
           >
         </div>
-      {%- else -%}
-        {%- comment -%} No image: render content normally {%- endcomment -%}
-        {%- if section.settings.targeted_subtitle != blank -%}
-          <p class="about-targeted__subtitle">{{ section.settings.targeted_subtitle }}</p>
-        {%- endif -%}
-        {%- if section.settings.targeted_title_line1 != blank or section.settings.targeted_title_line2 != blank -%}
-          <h2 class="about-targeted__title">
-            {%- if section.settings.targeted_title_line1 != blank -%}
-              <span class="font-accent">{{ section.settings.targeted_title_line1 }}</span>
-            {%- endif -%}
-            {%- if section.settings.targeted_title_line2 != blank -%}
-              <br><em class="font-italic">{{ section.settings.targeted_title_line2 }}</em>
-            {%- endif -%}
-          </h2>
-        {%- endif -%}
-        <div class="about-targeted__dots" aria-hidden="true">
-          <span class="dot dot--pink"></span>
-          <span class="dot dot--navy"></span>
-          <span class="dot dot--blue"></span>
-          <span class="dot dot--green"></span>
-        </div>
       {%- endif -%}
 
     </div>
   </section>
 
-  {%- comment -%} ============================================================
+  {%- comment -%}
+    ============================================================
     SECTION 3 — Phase Accordion (desktop) / Slider (mobile)
   {%- endcomment -%}
   <section class="about-section about-phases" id="about-phases">
     <div class="about-container">
-
       <div class="about-phases__inner">
         {%- comment -%} Left: phase image — also used as the static image on mobile {%- endcomment -%}
         <div class="about-phases__media" id="phases-media">
@@ -238,7 +191,9 @@
                 <div
                   class="phase-item__body"
                   id="phase-body-{{ forloop.index0 }}"
-                  {% unless forloop.first %}hidden{% endunless %}
+                  {% unless forloop.first %}
+                    hidden
+                  {% endunless %}
                 >
                   <p class="phase-item__desc">{{ block.settings.phase_description }}</p>
                 </div>
@@ -284,16 +239,15 @@
           {%- endif -%}
         {%- endfor -%}
       </div>
-
     </div>
   </section>
 
-  {%- comment -%} ============================================================
+  {%- comment -%}
+    ============================================================
     SECTION 4 — Mission: Two-Column (Content | Image)
   {%- endcomment -%}
   <section class="about-section about-mission">
     <div class="about-container">
-
       <div class="about-mission__columns">
         {%- comment -%} Left: text content {%- endcomment -%}
         <div class="about-mission__col about-mission__col--content">
@@ -306,7 +260,8 @@
                 <em class="font-italic">{{ section.settings.mission_title_line1 }}</em>
               {%- endif -%}
               {%- if section.settings.mission_title_line2 != blank -%}
-                <br><span class="font-primary">{{ section.settings.mission_title_line2 }}</span>
+                <br>
+                <span class="font-primary">{{ section.settings.mission_title_line2 }}</span>
               {%- endif -%}
             </h2>
           {%- endif -%}
@@ -328,121 +283,132 @@
           {%- endif -%}
         </div>
       </div>
-
     </div>
   </section>
-
 </div>
 
 <script>
-(function () {
-  'use strict';
+  (function () {
+    'use strict';
 
-  // ── Phase Accordion (desktop / tablet) ──────────────────────────────────
-  var accordion      = document.getElementById('phases-accordion');
-  var mediaContainer = document.getElementById('phases-media');
+    // ── Phase Accordion (desktop / tablet) ──────────────────────────────────
+    var accordion      = document.getElementById('phases-accordion');
+    var mediaContainer = document.getElementById('phases-media');
 
-  if (accordion && mediaContainer) {
-    var items      = accordion.querySelectorAll('.phase-item');
-    var mediaItems = mediaContainer.querySelectorAll('.phases-media__item');
+    if (accordion && mediaContainer) {
+      var items      = accordion.querySelectorAll('.phase-item');
+      var mediaItems = mediaContainer.querySelectorAll('.phases-media__item');
 
-    function activatePhase(index) {
-      items.forEach(function (item, i) {
-        var isTarget = i === index;
-        var btn  = item.querySelector('.phase-item__header');
-        var body = item.querySelector('.phase-item__body');
+      function activatePhase(index) {
+        items.forEach(function (item, i) {
+          var isTarget = i === index;
+          var btn  = item.querySelector('.phase-item__header');
+          var body = item.querySelector('.phase-item__body');
 
-        item.classList.toggle('is-active', isTarget);
-        btn.setAttribute('aria-expanded', isTarget ? 'true' : 'false');
+          item.classList.toggle('is-active', isTarget);
+          btn.setAttribute('aria-expanded', isTarget ? 'true' : 'false');
 
-        if (isTarget) {
-          body.removeAttribute('hidden');
-        } else {
-          body.setAttribute('hidden', '');
-        }
-      });
+          if (isTarget) {
+            body.removeAttribute('hidden');
+          } else {
+            body.setAttribute('hidden', '');
+          }
+        });
 
-      mediaItems.forEach(function (mi, i) {
-        mi.classList.toggle('is-active', i === index);
-      });
-    }
-
-    items.forEach(function (item, index) {
-      var btn = item.querySelector('.phase-item__header');
-      btn.addEventListener('click', function () {
-        activatePhase(index);
-      });
-    });
-  }
-
-  // ── Mobile Slider ────────────────────────────────────────────────────────
-  var slider        = document.getElementById('phases-slider');
-  var dotsContainer = document.getElementById('slider-dots');
-
-  if (slider && dotsContainer) {
-    var slides           = slider.querySelectorAll('.phase-slide');
-    var dots             = dotsContainer.querySelectorAll('.slider-dot');
-    var mobileMediaItems = mediaContainer
-      ? mediaContainer.querySelectorAll('.phases-media__item')
-      : [];
-    var currentSlide = 0;
-    var startX       = 0;
-    var isDragging   = false;
-
-    function syncMediaImage(index) {
-      mobileMediaItems.forEach(function (mi, i) {
-        mi.classList.toggle('is-active', i === index);
-      });
-    }
-
-    function goToSlide(index) {
-      if (index < 0) index = slides.length - 1;
-      if (index >= slides.length) index = 0;
-      currentSlide = index;
-
-      slider.scrollTo({ left: slider.offsetWidth * currentSlide, behavior: 'smooth' });
-
-      dots.forEach(function (dot, i) {
-        dot.classList.toggle('is-active', i === currentSlide);
-      });
-
-      // Keep the static image in sync with the active content slide
-      syncMediaImage(currentSlide);
-    }
-
-    dots.forEach(function (dot, i) {
-      dot.addEventListener('click', function () { goToSlide(i); });
-    });
-
-    // Touch swipe
-    slider.addEventListener('touchstart', function (e) {
-      startX     = e.touches[0].clientX;
-      isDragging = true;
-    }, { passive: true });
-
-    slider.addEventListener('touchend', function (e) {
-      if (!isDragging) return;
-      var diff = startX - e.changedTouches[0].clientX;
-      if (Math.abs(diff) > 50) {
-        goToSlide(diff > 0 ? currentSlide + 1 : currentSlide - 1);
+        mediaItems.forEach(function (mi, i) {
+          mi.classList.toggle('is-active', i === index);
+        });
       }
-      isDragging = false;
-    }, { passive: true });
 
-    // Scroll-snap sync — dots + static image
-    slider.addEventListener('scroll', function () {
-      var index = Math.round(slider.scrollLeft / slider.offsetWidth);
-      if (index !== currentSlide) {
+      items.forEach(function (item, index) {
+        var btn = item.querySelector('.phase-item__header');
+        btn.addEventListener('click', function () {
+          activatePhase(index);
+        });
+      });
+    }
+
+    // ── Mobile Slider ────────────────────────────────────────────────────────
+    var slider        = document.getElementById('phases-slider');
+    var dotsContainer = document.getElementById('slider-dots');
+
+    if (slider && dotsContainer) {
+      var slides           = slider.querySelectorAll('.phase-slide');
+      var dots             = dotsContainer.querySelectorAll('.slider-dot');
+      var mobileMediaItems = mediaContainer
+        ? mediaContainer.querySelectorAll('.phases-media__item')
+        : [];
+      var currentSlide = 0;
+      var startX       = 0;
+      var isDragging   = false;
+
+      function syncMediaImage(index) {
+        mobileMediaItems.forEach(function (mi, i) {
+          mi.classList.toggle('is-active', i === index);
+        });
+      }
+
+      function goToSlide(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
         currentSlide = index;
+
+        slider.scrollTo({ left: slider.offsetWidth * currentSlide, behavior: 'smooth' });
+
         dots.forEach(function (dot, i) {
           dot.classList.toggle('is-active', i === currentSlide);
         });
+
+        // Keep the static image in sync with the active content slide
         syncMediaImage(currentSlide);
       }
-    }, { passive: true });
-  }
 
-})();
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () {
+          goToSlide(i);
+        });
+      });
+
+      // Touch swipe
+      slider.addEventListener(
+        'touchstart',
+        function (e) {
+          startX     = e.touches[0].clientX;
+          isDragging = true;
+        },
+        { passive: true }
+      );
+
+      slider.addEventListener(
+        'touchend',
+        function (e) {
+          if (!isDragging) return;
+          var diff = startX - e.changedTouches[0].clientX;
+          if (Math.abs(diff) > 50) {
+            goToSlide(diff > 0 ? currentSlide + 1 : currentSlide - 1);
+          }
+          isDragging = false;
+        },
+        { passive: true }
+      );
+
+      // Scroll-snap sync — dots + static image
+      slider.addEventListener(
+        'scroll',
+        function () {
+          var index = Math.round(slider.scrollLeft / slider.offsetWidth);
+          if (index !== currentSlide) {
+            currentSlide = index;
+            dots.forEach(function (dot, i) {
+              dot.classList.toggle('is-active', i === currentSlide);
+            });
+            syncMediaImage(currentSlide);
+          }
+        },
+        { passive: true }
+      );
+    }
+  })();
 </script>
 
 {% schema %}
@@ -462,19 +428,14 @@
       "default": "No Exaggerated science."
     },
     {
-      "type": "image_picker",
-      "id": "hero_gif_1",
-      "label": "Polaroid image / GIF 1"
+      "type": "video",
+      "id": "hero_video_1",
+      "label": "Polaroid video — Card 1 (left)"
     },
     {
-      "type": "image_picker",
-      "id": "hero_gif_2",
-      "label": "Polaroid image / GIF 2"
-    },
-    {
-      "type": "image_picker",
-      "id": "hero_gif_3",
-      "label": "Polaroid image / GIF 3"
+      "type": "video",
+      "id": "hero_video_2",
+      "label": "Polaroid video — Card 2 (right)"
     },
     {
       "type": "text",
