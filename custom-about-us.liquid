@@ -1,0 +1,592 @@
+{% comment %}
+  Custom About Us Section
+  4-section layout: Hero | Targeted Solutions | Phase Accordion | Mission
+{% endcomment %}
+
+{{ 'custom-about-us.css' | asset_url | stylesheet_tag }}
+
+<div class="about-us-page">
+  {%- comment -%}
+    ============================================================
+    SECTION 1 — Hero: Main Title + Two-Column (Polaroid Videos | Content)
+  {%- endcomment -%}
+  <section class="about-section about-hero">
+    <div class="about-container">
+      {%- if section.settings.hero_main_title != blank -%}
+        <h1 class="about-hero__main-title">
+          {{ section.settings.hero_main_title }}
+        </h1>
+      {%- endif -%}
+
+      <div class="about-hero__columns">
+        {%- comment -%} Left: Polaroid video cards {%- endcomment -%}
+        <div class="about-hero__col about-hero__col--media">
+          <div class="about-hero__polaroid-wrap">
+
+            {%- comment -%} Card 1 — tilts left {%- endcomment -%}
+            <div class="polaroid-card polaroid-card--1">
+              <div class="polaroid-card__tape"></div>
+              <div class="polaroid-card__frame">
+                {%- if section.settings.hero_video_1 != blank -%}
+                  {{
+                    section.settings.hero_video_1
+                    | video_tag:
+                      autoplay: true,
+                      muted: true,
+                      loop: true,
+                      playsinline: true,
+                      class: 'polaroid-card__video'
+                  }}
+                {%- else -%}
+                  <div class="polaroid-card__placeholder">
+                    {{ 'image' | placeholder_svg_tag: 'polaroid-card__placeholder-svg' }}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- comment -%} Card 2 — tilts right {%- endcomment -%}
+            <div class="polaroid-card polaroid-card--2">
+              <div class="polaroid-card__tape"></div>
+              <div class="polaroid-card__frame">
+                {%- if section.settings.hero_video_2 != blank -%}
+                  {{
+                    section.settings.hero_video_2
+                    | video_tag:
+                      autoplay: true,
+                      muted: true,
+                      loop: true,
+                      playsinline: true,
+                      class: 'polaroid-card__video'
+                  }}
+                {%- else -%}
+                  <div class="polaroid-card__placeholder">
+                    {{ 'image' | placeholder_svg_tag: 'polaroid-card__placeholder-svg' }}
+                  </div>
+                {%- endif -%}
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {%- comment -%} Right: Subtitle + Title (mixed fonts) + Description {%- endcomment -%}
+        <div class="about-hero__col about-hero__col--content">
+          {%- if section.settings.hero_eyebrow != blank -%}
+            <p class="about-hero__eyebrow">{{ section.settings.hero_eyebrow }}</p>
+          {%- endif -%}
+          {%- if section.settings.hero_title_line1 != blank or section.settings.hero_title_line2 != blank -%}
+            <h2 class="about-hero__title">
+              {%- if section.settings.hero_title_line1 != blank -%}
+                <span class="font-primary">{{ section.settings.hero_title_line1 }}</span>
+              {%- endif -%}
+              {%- if section.settings.hero_title_line2 != blank -%}
+                <br>
+                <span class="font-accent">{{ section.settings.hero_title_line2 }}</span>
+              {%- endif -%}
+              {%- if section.settings.hero_title_line3 != blank -%}
+                <br>
+                <em class="font-italic">{{ section.settings.hero_title_line3 }}</em>
+              {%- endif -%}
+            </h2>
+          {%- endif -%}
+          {%- if section.settings.hero_description != blank -%}
+            <div class="about-hero__desc rte">{{ section.settings.hero_description }}</div>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%}
+    ============================================================
+    SECTION 2 — Targeted Solutions: Subtitle | Title | Dots | Image
+  {%- endcomment -%}
+  <section class="about-section about-targeted">
+    <div class="about-container about-container--narrow">
+       {%- if section.settings.targeted_subtitle != blank -%}
+        <p class="about-targeted__subtitle">{{ section.settings.targeted_subtitle }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.targeted_title_line1 != blank or section.settings.targeted_title_line2 != blank -%}
+        <h2 class="about-targeted__title">
+          {%- if section.settings.targeted_title_line1 != blank -%}
+            <span class="font-accent">{{ section.settings.targeted_title_line1 }}</span>
+          {%- endif -%}
+          {%- if section.settings.targeted_title_line2 != blank -%}
+            <br><em class="font-italic">{{ section.settings.targeted_title_line2 }}</em>
+          {%- endif -%}
+        </h2>
+      {%- endif -%}
+
+      <div class="about-targeted__dots" aria-hidden="true">
+        <span class="dot dot--pink"></span>
+        <span class="dot dot--navy"></span>
+        <span class="dot dot--blue"></span>
+        <span class="dot dot--green"></span>
+      </div>
+
+      {%- if section.settings.targeted_image != blank -%}
+        <div class="about-targeted__image-wrap">
+          <img
+            src="{{ section.settings.targeted_image | img_url: '1200x' }}"
+            alt="{{ section.settings.targeted_image.alt | escape }}"
+            loading="lazy"
+            width="1200"
+            class="about-targeted__image"
+          >
+        </div>
+      {%- endif -%}
+
+    </div>
+  </section>
+
+  {%- comment -%}
+    ============================================================
+    SECTION 3 — Phase Accordion (desktop) / Slider (mobile)
+  {%- endcomment -%}
+  <section class="about-section about-phases" id="about-phases">
+    <div class="about-container">
+      <div class="about-phases__inner">
+        {%- comment -%} Left: phase image {%- endcomment -%}
+        <div class="about-phases__media" id="phases-media">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'phase' -%}
+              {%- if block.settings.phase_image != blank -%}
+                <div
+                  class="phases-media__item{% if forloop.first %} is-active{% endif %}"
+                  data-phase="{{ forloop.index0 }}"
+                >
+                  <img
+                    src="{{ block.settings.phase_image | img_url: '700x' }}"
+                    alt="{{ block.settings.phase_image.alt | default: block.settings.phase_title | escape }}"
+                    loading="lazy"
+                    width="700"
+                  >
+                </div>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+
+        {%- comment -%} Right: accordion list (desktop/tablet) {%- endcomment -%}
+        <div class="about-phases__accordion" id="phases-accordion">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'phase' -%}
+              <div
+                class="phase-item{% if forloop.first %} is-active{% endif %}"
+                data-phase="{{ forloop.index0 }}"
+                {{ block.shopify_attributes }}
+              >
+                <button
+                  class="phase-item__header"
+                  aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                  aria-controls="phase-body-{{ forloop.index0 }}"
+                >
+                  <span class="phase-item__number">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                  <span class="phase-item__pipe" aria-hidden="true">|</span>
+                  <span class="phase-item__label">{{ block.settings.phase_label }}</span>
+                  <span class="phase-item__name">{{ block.settings.phase_title }}</span>
+                </button>
+                <div
+                  class="phase-item__body"
+                  id="phase-body-{{ forloop.index0 }}"
+                  {% unless forloop.first %}
+                    hidden
+                  {% endunless %}
+                >
+                  <p class="phase-item__desc">{{ block.settings.phase_description }}</p>
+                </div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+
+      {%- comment -%} Mobile slider {%- endcomment -%}
+      <div class="about-phases__slider" id="phases-slider" aria-label="Phases slider">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'phase' -%}
+            <div class="phase-slide" data-phase="{{ forloop.index0 }}">
+              {%- if block.settings.phase_image != blank -%}
+                <div class="phase-slide__image-wrap">
+                  <img
+                    src="{{ block.settings.phase_image | img_url: '800x' }}"
+                    alt="{{ block.settings.phase_image.alt | default: block.settings.phase_title | escape }}"
+                    loading="lazy"
+                    width="800"
+                  >
+                </div>
+              {%- endif -%}
+              <div class="phase-slide__content">
+                <p class="phase-slide__label">{{ block.settings.phase_label }}</p>
+                <h3 class="phase-slide__title">{{ block.settings.phase_title }}</h3>
+                <p class="phase-slide__desc">{{ block.settings.phase_description }}</p>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {%- comment -%} Mobile slider dots {%- endcomment -%}
+      <div class="about-phases__slider-dots" id="slider-dots" aria-label="Slide indicators">
+        {%- assign phase_count = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'phase' -%}
+            {%- assign phase_count = phase_count | plus: 1 -%}
+            <button
+              class="slider-dot{% if forloop.first %} is-active{% endif %}"
+              data-slide="{{ forloop.index0 }}"
+              aria-label="Go to slide {{ forloop.index }}"
+            ></button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+  </section>
+
+  {%- comment -%}
+    ============================================================
+    SECTION 4 — Mission: Two-Column (Content | Image)
+  {%- endcomment -%}
+  <section class="about-section about-mission">
+    <div class="about-container">
+      <div class="about-mission__columns">
+        {%- comment -%} Left: text content {%- endcomment -%}
+        <div class="about-mission__col about-mission__col--content">
+          {%- if section.settings.mission_subtitle != blank -%}
+            <p class="about-mission__subtitle">{{ section.settings.mission_subtitle }}</p>
+          {%- endif -%}
+          {%- if section.settings.mission_title_line1 != blank or section.settings.mission_title_line2 != blank -%}
+            <h2 class="about-mission__title">
+              {%- if section.settings.mission_title_line1 != blank -%}
+                <em class="font-italic">{{ section.settings.mission_title_line1 }}</em>
+              {%- endif -%}
+              {%- if section.settings.mission_title_line2 != blank -%}
+                <br>
+                <span class="font-primary">{{ section.settings.mission_title_line2 }}</span>
+              {%- endif -%}
+            </h2>
+          {%- endif -%}
+          {%- if section.settings.mission_description != blank -%}
+            <div class="about-mission__desc rte">{{ section.settings.mission_description }}</div>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%} Right: image {%- endcomment -%}
+        <div class="about-mission__col about-mission__col--media">
+          {%- if section.settings.mission_image != blank -%}
+            <img
+              src="{{ section.settings.mission_image | img_url: '800x' }}"
+              alt="{{ section.settings.mission_image.alt | escape }}"
+              loading="lazy"
+              width="800"
+              class="about-mission__image"
+            >
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  (function () {
+    'use strict';
+
+    // ── Phase Accordion (desktop / tablet) ──────────────────────────────────
+    var accordion = document.getElementById('phases-accordion');
+    var mediaContainer = document.getElementById('phases-media');
+
+    if (accordion && mediaContainer) {
+      var items = accordion.querySelectorAll('.phase-item');
+      var mediaItems = mediaContainer.querySelectorAll('.phases-media__item');
+
+      function activatePhase(index) {
+        items.forEach(function (item, i) {
+          var isTarget = i === index;
+          var btn = item.querySelector('.phase-item__header');
+          var body = item.querySelector('.phase-item__body');
+
+          item.classList.toggle('is-active', isTarget);
+          btn.setAttribute('aria-expanded', isTarget ? 'true' : 'false');
+
+          if (isTarget) {
+            body.removeAttribute('hidden');
+          } else {
+            body.setAttribute('hidden', '');
+          }
+        });
+
+        mediaItems.forEach(function (mi, i) {
+          mi.classList.toggle('is-active', i === index);
+        });
+      }
+
+      items.forEach(function (item, index) {
+        var btn = item.querySelector('.phase-item__header');
+        btn.addEventListener('click', function () {
+          activatePhase(index);
+        });
+      });
+    }
+
+    // ── Mobile Slider ────────────────────────────────────────────────────────
+    var slider = document.getElementById('phases-slider');
+    var dotsContainer = document.getElementById('slider-dots');
+
+    if (slider && dotsContainer) {
+      var slides = slider.querySelectorAll('.phase-slide');
+      var dots = dotsContainer.querySelectorAll('.slider-dot');
+      var currentSlide = 0;
+      var startX = 0;
+      var isDragging = false;
+
+      function goToSlide(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+        currentSlide = index;
+
+        slider.scrollTo({ left: slider.offsetWidth * currentSlide, behavior: 'smooth' });
+
+        dots.forEach(function (dot, i) {
+          dot.classList.toggle('is-active', i === currentSlide);
+        });
+      }
+
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () {
+          goToSlide(i);
+        });
+      });
+
+      // Touch swipe
+      slider.addEventListener(
+        'touchstart',
+        function (e) {
+          startX = e.touches[0].clientX;
+          isDragging = true;
+        },
+        { passive: true }
+      );
+
+      slider.addEventListener(
+        'touchend',
+        function (e) {
+          if (!isDragging) return;
+          var diff = startX - e.changedTouches[0].clientX;
+          if (Math.abs(diff) > 50) {
+            goToSlide(diff > 0 ? currentSlide + 1 : currentSlide - 1);
+          }
+          isDragging = false;
+        },
+        { passive: true }
+      );
+
+      // Scroll-snap sync dots
+      slider.addEventListener(
+        'scroll',
+        function () {
+          var index = Math.round(slider.scrollLeft / slider.offsetWidth);
+          if (index !== currentSlide) {
+            currentSlide = index;
+            dots.forEach(function (dot, i) {
+              dot.classList.toggle('is-active', i === currentSlide);
+            });
+          }
+        },
+        { passive: true }
+      );
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Custom About Us",
+  "tag": "section",
+  "class": "section-custom-about-us",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section 1 — Hero"
+    },
+    {
+      "type": "text",
+      "id": "hero_main_title",
+      "label": "Main title",
+      "default": "No Exaggerated science."
+    },
+    {
+      "type": "video",
+      "id": "hero_video_1",
+      "label": "Polaroid video — Card 1 (left)"
+    },
+    {
+      "type": "video",
+      "id": "hero_video_2",
+      "label": "Polaroid video — Card 2 (right)"
+    },
+    {
+      "type": "text",
+      "id": "hero_eyebrow",
+      "label": "Eyebrow text",
+      "default": "WHEN WE STARTED WE KNEW WE WANTED TO CREATE"
+    },
+    {
+      "type": "text",
+      "id": "hero_title_line1",
+      "label": "Title line 1 (Circular Std font)",
+      "default": "Just simple &"
+    },
+    {
+      "type": "text",
+      "id": "hero_title_line2",
+      "label": "Title line 2 (bold)",
+      "default": "targeted solutions for"
+    },
+    {
+      "type": "text",
+      "id": "hero_title_line3",
+      "label": "Title line 3 (italic accent font)",
+      "default": "every phase of you"
+    },
+    {
+      "type": "richtext",
+      "id": "hero_description",
+      "label": "Description",
+      "default": "<p>We understand that every body responds differently, and as does progress. It takes time, and consistency is key. That is why we focus on offering solutions for both visible and invisible needs of women at every phase, without overcomplicating or hiding behind jargon. Just honest care, so you can choose what feels right for you.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Section 2 — Targeted Solutions"
+    },
+    {
+      "type": "text",
+      "id": "targeted_subtitle",
+      "label": "Subtitle",
+      "default": "BLOOM"
+    },
+    {
+      "type": "text",
+      "id": "targeted_title_line1",
+      "label": "Title line 1 (bold)",
+      "default": "Targeted solutions for"
+    },
+    {
+      "type": "text",
+      "id": "targeted_title_line2",
+      "label": "Title line 2 (italic accent font)",
+      "default": "Every Phase of you."
+    },
+    {
+      "type": "image_picker",
+      "id": "targeted_image",
+      "label": "Main image"
+    },
+    {
+      "type": "header",
+      "content": "Section 4 — Mission"
+    },
+    {
+      "type": "text",
+      "id": "mission_subtitle",
+      "label": "Subtitle",
+      "default": "OUR MISSION"
+    },
+    {
+      "type": "text",
+      "id": "mission_title_line1",
+      "label": "Title line 1 (italic accent font)",
+      "default": "To empower women"
+    },
+    {
+      "type": "text",
+      "id": "mission_title_line2",
+      "label": "Title line 2 (Circular Std font)",
+      "default": "to understand & own their health."
+    },
+    {
+      "type": "richtext",
+      "id": "mission_description",
+      "label": "Description",
+      "default": "<p>We focus on helping women understand how their bodies work, so they can make informed choices with confidence. With honest, thoughtful care, we aim to support both their health and pleasure in a way that feels natural and sustainable.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "mission_image",
+      "label": "Mission image"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "phase",
+      "name": "Phase",
+      "settings": [
+        {
+          "type": "text",
+          "id": "phase_label",
+          "label": "Phase label",
+          "default": "Phase 1"
+        },
+        {
+          "type": "text",
+          "id": "phase_title",
+          "label": "Phase title",
+          "default": "Period Care"
+        },
+        {
+          "type": "textarea",
+          "id": "phase_description",
+          "label": "Phase description",
+          "default": "Not every period feels the same. From PMS to PCOS, we are here with care that supports what your body needs, when it needs it."
+        },
+        {
+          "type": "image_picker",
+          "id": "phase_image",
+          "label": "Phase image"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Custom About Us",
+      "blocks": [
+        {
+          "type": "phase",
+          "settings": {
+            "phase_label": "Phase 1",
+            "phase_title": "Period Care",
+            "phase_description": "Not every period feels the same. From PMS to PCOS, we are here with care that supports what your body needs, when it needs it."
+          }
+        },
+        {
+          "type": "phase",
+          "settings": {
+            "phase_label": "Phase 2",
+            "phase_title": "Hygiene Care",
+            "phase_description": "Good hygiene is the first step to feeling like yourself. We offer thoughtful care for your skin and intimate needs, made to feel simple, comfortable, and right for you every day."
+          }
+        },
+        {
+          "type": "phase",
+          "settings": {
+            "phase_label": "Phase 3",
+            "phase_title": "Sexual Wellness",
+            "phase_description": "Your pleasure and comfort matter. Explore products designed to support your intimate wellness with care, honesty, and zero judgment."
+          }
+        },
+        {
+          "type": "phase",
+          "settings": {
+            "phase_label": "Phase 4",
+            "phase_title": "Pregnancy Care",
+            "phase_description": "Every stage of pregnancy deserves dedicated support. We provide solutions that keep you comfortable, informed, and cared for throughout."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
