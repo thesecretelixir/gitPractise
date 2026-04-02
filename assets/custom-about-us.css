@@ -1,0 +1,796 @@
+/* ==========================================================================
+   Custom About Us — Styles
+   Supports: Desktop (≥1024px) | Tablet (768–1023px) | Mobile (≤767px)
+   ========================================================================== */
+
+/* ── Font families ──────────────────────────────────────────────────────── */
+/*
+  @font-face rules are declared in the Liquid section file (custom-about-us.liquid)
+  using asset_url filters so Shopify can resolve the correct CDN paths.
+
+  CircularStd  — upload CircularStd-Book.woff2 / CircularStd-Bold.woff2 to /assets
+  AccentItalic — upload your chosen script/serif italic font to /assets
+                 e.g. PlayfairDisplay-Italic.woff2
+*/
+
+/* ── Design tokens ──────────────────────────────────────────────────────── */
+:root {
+  --about-font-primary:  'CircularStd', 'Helvetica Neue', Arial, sans-serif;
+  --about-font-accent:   'AccentItalic', Georgia, serif;
+
+  --about-color-navy:    #1a2d5a;
+  --about-color-blue:    #3a6fc4;
+  --about-color-pink:    #e8607a;
+  --about-color-green:   #5ab85e;
+  --about-color-text:    #2b2b2b;
+  --about-color-muted:   #6b6b6b;
+  --about-color-light:   #f5f5f5;
+  --about-color-white:   #ffffff;
+  --about-color-border:  #e2e2e2;
+
+  --about-radius:        12px;
+  --about-shadow:        0 4px 24px rgba(0,0,0,.10);
+
+  --about-gap-sm:        1rem;
+  --about-gap-md:        2rem;
+  --about-gap-lg:        4rem;
+
+  --about-container-max: 1200px;
+  --about-container-narrow: 860px;
+}
+
+/* ── Reset / base ───────────────────────────────────────────────────────── */
+.about-us-page *,
+.about-us-page *::before,
+.about-us-page *::after {
+  box-sizing: border-box;
+}
+
+.about-us-page {
+  font-family: var(--about-font-primary);
+  color: var(--about-color-text);
+  overflow-x: hidden;
+}
+
+.about-us-page img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Font helpers */
+.about-us-page .font-primary  { font-family: var(--about-font-primary); font-weight: 700; }
+.about-us-page .font-accent   { font-family: var(--about-font-primary); font-weight: 700; }
+.about-us-page .font-italic   { font-family: var(--about-font-accent);  font-style: italic; font-weight: 400; }
+
+/* ── Shared layout helpers ──────────────────────────────────────────────── */
+.about-section {
+  padding: var(--about-gap-lg) 1.5rem;
+}
+
+.about-container {
+  max-width: var(--about-container-max);
+  margin-inline: auto;
+}
+
+.about-container--narrow {
+  max-width: var(--about-container-narrow);
+  margin-inline: auto;
+}
+
+/* ==========================================================================
+   SECTION 1 — Hero
+   ========================================================================== */
+
+/* Main title */
+.about-hero__main-title {
+  font-family: var(--about-font-primary);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 700;
+  color: var(--about-color-navy);
+  text-align: center;
+  margin: 0 0 var(--about-gap-lg);
+  letter-spacing: -.5px;
+}
+
+.about-hero__main-title em {
+  font-family: var(--about-font-accent);
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Two-column layout */
+.about-hero__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--about-gap-lg);
+  align-items: center;
+}
+
+/* ── Polaroid / GIF frames ─────────────────────────────────────────── */
+.about-hero__polaroid-wrap {
+  position: relative;
+  height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.polaroid {
+  position: absolute;
+  background: var(--about-color-white);
+  padding: 10px 10px 32px;
+  box-shadow: var(--about-shadow);
+  border-radius: 4px;
+  width: 210px;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+
+.polaroid img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+
+.polaroid--1 {
+  top: 0;
+  left: 10%;
+  transform: rotate(-6deg);
+  z-index: 1;
+}
+
+.polaroid--2 {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(3deg);
+  z-index: 3;
+  width: 230px;
+}
+
+.polaroid--2 img {
+  height: 210px;
+}
+
+.polaroid--3 {
+  bottom: 0;
+  right: 5%;
+  transform: rotate(5deg);
+  z-index: 2;
+}
+
+.polaroid:hover {
+  transform: rotate(0deg) scale(1.04);
+  box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  z-index: 10;
+}
+
+/* ── Hero content (right column) ──────────────────────────────────── */
+.about-hero__col--content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--about-gap-sm);
+}
+
+.about-hero__eyebrow {
+  font-size: .75rem;
+  font-weight: 500;
+  letter-spacing: .12em;
+  color: var(--about-color-muted);
+  text-transform: uppercase;
+  margin: 0;
+  line-height: 1.6;
+  text-align: center;
+}
+
+.about-hero__title {
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  line-height: 1.2;
+  color: var(--about-color-navy);
+  margin: 0;
+}
+
+.about-hero__title .font-primary {
+  font-weight: 700;
+}
+
+.about-hero__title .font-accent {
+  font-weight: 700;
+}
+
+.about-hero__title .font-italic {
+  font-family: var(--about-font-accent);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.1em;
+  color: var(--about-color-navy);
+}
+
+.about-hero__desc {
+  font-size: .9375rem;
+  line-height: 1.7;
+  color: var(--about-color-text);
+  margin: 0;
+}
+
+.about-hero__desc p { margin: 0; }
+
+/* ==========================================================================
+   SECTION 2 — Targeted Solutions
+   ========================================================================== */
+.about-targeted {
+  text-align: center;
+  background: var(--about-color-white);
+}
+
+.about-targeted__subtitle {
+  font-size: .8125rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--about-color-muted);
+  margin: 0 0 .75rem;
+}
+
+.about-targeted__title {
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--about-color-navy);
+  margin: 0 0 1.5rem;
+  line-height: 1.15;
+}
+
+.about-targeted__title .font-accent {
+  font-weight: 700;
+}
+
+.about-targeted__title .font-italic {
+  font-family: var(--about-font-accent);
+  font-style: italic;
+  font-weight: 400;
+  font-size: 1.08em;
+}
+
+/* Colorful dots */
+.about-targeted__dots {
+  display: flex;
+  justify-content: center;
+  gap: .5rem;
+  margin-bottom: 2rem;
+}
+
+.dot {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.dot--pink  { background: #f4a5b3; }
+.dot--navy  { background: var(--about-color-navy); }
+.dot--blue  { background: var(--about-color-blue); }
+.dot--green { background: var(--about-color-green); }
+
+/* Image wrap — contains both the overlay and the image */
+.about-targeted__image-wrap {
+  position: relative;
+  border-radius: var(--about-radius);
+  overflow: hidden;
+  box-shadow: var(--about-shadow);
+}
+
+.about-targeted__image {
+  width: 100%;
+  height: 520px;
+  object-fit: cover;
+  object-position: top;
+  display: block;
+}
+
+/* Content overlay — centred over the top portion of the image */
+.about-targeted__overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1.5rem 3rem;
+  /* subtle gradient so text stays legible over any image */
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 255, 255, 0.60) 70%,
+    rgba(255, 255, 255, 0.00) 100%
+  );
+}
+
+/* When there is no image, overlay becomes a plain block */
+.about-targeted__subtitle,
+.about-targeted__title,
+.about-targeted__dots {
+  /* these are also used in the no-image fallback, keep text centred */
+  text-align: center;
+}
+
+/* ==========================================================================
+   SECTION 3 — Phases Accordion
+   ========================================================================== */
+.about-phases {
+  background: var(--about-color-light);
+}
+
+/* ── Desktop / Tablet inner layout ─────────────────────────────────── */
+.about-phases__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--about-gap-lg);
+  align-items: start;
+}
+
+/* Phase image panel */
+.about-phases__media {
+  position: sticky;
+  top: 2rem;
+  border-radius: var(--about-radius);
+  overflow: hidden;
+  box-shadow: var(--about-shadow);
+  background: var(--about-color-navy);
+  aspect-ratio: 1 / 1;
+}
+
+.phases-media__item {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity .4s ease;
+}
+
+.phases-media__item:first-child {
+  position: relative;
+}
+
+.phases-media__item.is-active {
+  opacity: 1;
+  z-index: 1;
+}
+
+.phases-media__item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Accordion list */
+.about-phases__accordion {
+  display: flex;
+  flex-direction: column;
+}
+
+.phase-item {
+  border-bottom: 1px solid var(--about-color-border);
+}
+
+.phase-item__header {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 1.375rem 0;
+  cursor: pointer;
+  text-align: left;
+  transition: color .2s;
+}
+
+.phase-item__header:hover .phase-item__name {
+  color: var(--about-color-blue);
+}
+
+.phase-item__number {
+  font-size: .8125rem;
+  font-weight: 600;
+  color: var(--about-color-muted);
+  min-width: 24px;
+}
+
+.phase-item__pipe {
+  color: var(--about-color-blue);
+  font-weight: 700;
+  font-size: 1.1rem;
+  opacity: 0;
+  transition: opacity .2s;
+}
+
+.phase-item.is-active .phase-item__pipe,
+.phase-item__header:hover .phase-item__pipe {
+  opacity: 1;
+}
+
+.phase-item__label {
+  font-size: .8125rem;
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--about-color-muted);
+  min-width: 60px;
+}
+
+.phase-item__name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--about-color-navy);
+  transition: color .2s;
+  flex: 1;
+}
+
+.phase-item.is-active .phase-item__name {
+  color: var(--about-color-blue);
+  font-size: 1.125rem;
+}
+
+.phase-item__body {
+  padding: 0 0 1.25rem 1.5rem;
+  animation: fadeSlideDown .3s ease;
+}
+
+.phase-item__body[hidden] {
+  display: none;
+}
+
+.phase-item__desc {
+  font-size: .9375rem;
+  line-height: 1.7;
+  color: var(--about-color-muted);
+  margin: 0;
+}
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+/* ── Mobile slider (hidden on desktop/tablet) ───────────────────────── */
+.about-phases__slider {
+  display: none;
+}
+
+.about-phases__slider-dots {
+  display: none;
+}
+
+/* ==========================================================================
+   SECTION 4 — Mission
+   ========================================================================== */
+.about-mission {
+  background: var(--about-color-white);
+}
+
+.about-mission__columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--about-gap-lg);
+  align-items: center;
+}
+
+.about-mission__col--content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--about-gap-sm);
+}
+
+.about-mission__subtitle {
+  font-size: .75rem;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--about-color-muted);
+  margin: 0;
+}
+
+.about-mission__title {
+  font-size: clamp(1.75rem, 3vw, 2.75rem);
+  line-height: 1.2;
+  color: var(--about-color-navy);
+  margin: 0;
+}
+
+.about-mission__title .font-italic {
+  font-family: var(--about-font-accent);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.about-mission__title .font-primary {
+  font-weight: 700;
+}
+
+.about-mission__desc {
+  font-size: .9375rem;
+  line-height: 1.75;
+  color: var(--about-color-text);
+}
+
+.about-mission__desc p { margin: 0; }
+
+.about-mission__desc strong {
+  font-weight: 700;
+  color: var(--about-color-navy);
+}
+
+.about-mission__image {
+  width: 100%;
+  border-radius: var(--about-radius);
+  box-shadow: var(--about-shadow);
+  object-fit: cover;
+  max-height: 520px;
+}
+
+/* ==========================================================================
+   TABLET — 768px to 1023px
+   ========================================================================== */
+@media screen and (min-width: 768px) and (max-width: 1023px) {
+
+  .about-section {
+    padding: 3rem 1.5rem;
+  }
+
+  /* Section 1 */
+  .about-hero__columns {
+    gap: var(--about-gap-md);
+  }
+
+  .about-hero__polaroid-wrap {
+    height: 380px;
+  }
+
+  .polaroid {
+    width: 170px;
+  }
+
+  .polaroid--2 {
+    width: 190px;
+  }
+
+  .polaroid img      { height: 150px; }
+  .polaroid--2 img   { height: 170px; }
+
+  /* Section 2 */
+  .about-targeted__image {
+    height: 380px;
+  }
+
+  /* Section 3 */
+  .about-phases__inner {
+    gap: var(--about-gap-md);
+  }
+
+  /* Section 4 */
+  .about-mission__columns {
+    gap: var(--about-gap-md);
+  }
+
+  .about-mission__image {
+    max-height: 380px;
+  }
+}
+
+/* ==========================================================================
+   MOBILE — up to 767px
+   ========================================================================== */
+@media screen and (max-width: 767px) {
+
+  .about-section {
+    padding: 2.5rem 1rem;
+  }
+
+  /* ── Section 1 mobile ───────────────────────────────────────────── */
+  .about-hero__columns {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  /* On mobile, media comes first */
+  .about-hero__col--media  { order: 1; }
+  .about-hero__col--content { order: 2; }
+
+  .about-hero__polaroid-wrap {
+    height: 300px;
+  }
+
+  .polaroid {
+    width: 140px;
+  }
+
+  .polaroid--2 {
+    width: 160px;
+  }
+
+  .polaroid img      { height: 120px; }
+  .polaroid--2 img   { height: 140px; }
+
+  .about-hero__main-title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .about-hero__title {
+    font-size: 1.625rem;
+    text-align: center;
+  }
+
+  .about-hero__eyebrow {
+    text-align: center;
+  }
+
+  .about-hero__desc {
+    text-align: center;
+  }
+
+  /* ── Section 2 mobile ───────────────────────────────────────────── */
+  .about-targeted__image {
+    height: 420px;
+  }
+
+  .about-targeted__overlay {
+    padding: 1.5rem 1rem 2.5rem;
+  }
+
+  /* ── Section 3 mobile — static image + content-only slider ─────── */
+
+  /* Show the inner wrapper so phases-media (static image) is visible;
+     hide only the accordion. */
+  .about-phases__inner {
+    display: block;
+    margin-bottom: 1.25rem;
+  }
+
+  .about-phases__accordion {
+    display: none;
+  }
+
+  /* Override desktop sticky so the image flows normally as a block */
+  .about-phases__media {
+    position: relative;
+    top: auto;
+    width: 100%;
+    /* border-radius, overflow, shadow, bg, aspect-ratio inherited from desktop rules */
+  }
+
+  /* Content-only slider — no images inside the slides */
+  .about-phases__slider {
+    display: flex;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0;
+  }
+
+  .about-phases__slider::-webkit-scrollbar {
+    display: none;
+  }
+
+  .phase-slide {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    gap: .75rem;
+  }
+
+  .phase-slide__content {
+    padding: 0 .25rem;
+  }
+
+  /* Color patch — vertical bar before the phase label */
+  .phase-slide__phase-meta {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+  }
+
+  .phase-slide__phase-meta::before {
+    content: '';
+    display: block;
+    width: 3px;
+    height: 1.125rem;
+    border-radius: 2px;
+    flex-shrink: 0;
+    background: var(--about-color-pink);
+  }
+
+  /* Alternate patch colour for even-numbered slides */
+  .phase-slide:nth-child(even) .phase-slide__phase-meta::before {
+    background: var(--about-color-blue);
+  }
+
+  .phase-slide__label {
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--about-color-blue);
+    margin: 0;
+  }
+
+  .phase-slide__title {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--about-color-navy);
+    margin: 0 0 .375rem;
+  }
+
+  .phase-slide__desc {
+    font-size: .9rem;
+    line-height: 1.7;
+    color: var(--about-color-muted);
+    margin: 0;
+  }
+
+  /* Slider dots */
+  .about-phases__slider-dots {
+    display: flex;
+    justify-content: center;
+    gap: .5rem;
+    margin-top: 1.25rem;
+  }
+
+  .slider-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--about-color-border);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background .25s, transform .25s;
+  }
+
+  .slider-dot.is-active {
+    background: var(--about-color-navy);
+    transform: scale(1.25);
+  }
+
+  /* ── Section 4 mobile ───────────────────────────────────────────── */
+  /*
+    Desired mobile order: Subtitle → Image → Title → Description
+    We use display:contents on the inner columns so their children
+    participate directly in the parent flex flow, then use order to
+    position them correctly.
+  */
+  .about-mission__columns {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  /* Dissolve column wrappers so children can be individually ordered */
+  .about-mission__col--content {
+    display: contents;
+  }
+
+  .about-mission__col--media {
+    order: 2; /* image sits between subtitle and title */
+  }
+
+  .about-mission__subtitle {
+    order: 1;
+    margin-bottom: .25rem;
+  }
+
+  .about-mission__title {
+    order: 3;
+    font-size: 1.625rem;
+  }
+
+  .about-mission__desc {
+    order: 4;
+  }
+
+  .about-mission__image {
+    max-height: 300px;
+    border-radius: var(--about-radius);
+  }
+}
