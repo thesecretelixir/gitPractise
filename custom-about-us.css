@@ -141,6 +141,7 @@
 .polaroid-card--1 {
   transform: rotate(var(--polaroid-rotate-1));
   z-index: 1;
+  margin-bottom: 60px;   /* lifts card 1 upward relative to card 2 */
 }
 
 .polaroid-card--2 {
