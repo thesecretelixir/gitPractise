@@ -1,0 +1,394 @@
+<section class="about-section about-phases" id="about-phases">
+  <div class="about-container">
+    <div class="about-phases__inner">
+      {%- comment -%} Left: phase image {%- endcomment -%}
+      <div class="about-phases__media" id="phases-media">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'phase' -%}
+            {%- if block.settings.phase_image != blank -%}
+              <div
+                class="phases-media__item{% if forloop.first %} is-active{% endif %}"
+                data-phase="{{ forloop.index0 }}"
+              >
+                <img
+                  src="{{ block.settings.phase_image | img_url: '700x' }}"
+                  alt="{{ block.settings.phase_image.alt | default: block.settings.phase_title | escape }}"
+                  loading="lazy"
+                  width="700"
+                >
+              </div>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {%- comment -%} Right: accordion list (desktop/tablet) {%- endcomment -%}
+      <div class="about-phases__accordion" id="phases-accordion">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'phase' -%}
+            <div
+              class="phase-item{% if forloop.first %} is-active{% endif %}"
+              data-phase="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              <button
+                class="phase-item__header"
+                aria-expanded="{% if forloop.first %}true{% else %}false{% endif %}"
+                aria-controls="phase-body-{{ forloop.index0 }}"
+              >
+                <span class="phase-item__number">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                <span class="phase-item__pipe" aria-hidden="true">|</span>
+                <span class="phase-item__label">{{ block.settings.phase_label }}</span>
+                <span class="phase-item__name">{{ block.settings.phase_title }}</span>
+              </button>
+              <div
+                class="phase-item__body"
+                id="phase-body-{{ forloop.index0 }}"
+                {% unless forloop.first %}hidden{% endunless %}
+              >
+                <p class="phase-item__desc">{{ block.settings.phase_description }}</p>
+              </div>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- comment -%} Mobile: content-only slider (image rendered above via phases-media) {%- endcomment -%}
+    <div class="about-phases__slider" id="phases-slider" aria-label="Phases slider">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'phase' -%}
+          <div class="phase-slide" data-phase="{{ forloop.index0 }}">
+            <div class="phase-slide__content">
+              <div class="phase-slide__phase-meta">
+                <p class="phase-slide__label">{{ block.settings.phase_label }}</p>
+              </div>
+              <h3 class="phase-slide__title">{{ block.settings.phase_title }}</h3>
+              <p class="phase-slide__desc">{{ block.settings.phase_description }}</p>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} Mobile slider dots {%- endcomment -%}
+    <div class="about-phases__slider-dots" id="slider-dots" aria-label="Slide indicators">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'phase' -%}
+          <button
+            class="slider-dot{% if forloop.first %} is-active{% endif %}"
+            data-slide="{{ forloop.index0 }}"
+            aria-label="Go to slide {{ forloop.index }}"
+          ></button>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+<style>
+  /* ── Section 3 desktop / tablet ───────────────────────────────────────── */
+  .about-phases__inner {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .about-phases__media {
+    flex: 0 0 50%;
+  }
+
+  .phases-media__item {
+    display: none;
+  }
+
+  .phases-media__item.is-active {
+    display: block;
+    border-radius: var(--about-radius);
+    overflow: hidden;
+    box-shadow: var(--about-shadow);
+  }
+
+  .phases-media__item img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .about-phases__accordion {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  /* Desktop phase item styles (keep existing) */
+
+  /* ── Slider hidden on desktop ─────────────────────────────────────────── */
+  .about-phases__slider,
+  .about-phases__slider-dots {
+    display: none;
+  }
+
+  /* ── Mobile ───────────────────────────────────────────────────────────── */
+  @media (max-width: 768px) {
+    /* Show inner but hide accordion; media becomes static image on mobile */
+    .about-phases__inner {
+      display: block;
+      margin-bottom: 1.25rem;
+    }
+
+    .about-phases__accordion {
+      display: none;
+    }
+
+    /* Static image panel */
+    .about-phases__media {
+      width: 100%;
+    }
+
+    .phases-media__item {
+      display: none;
+    }
+
+    .phases-media__item.is-active {
+      display: block;
+      border-radius: var(--about-radius);
+      overflow: hidden;
+      box-shadow: var(--about-shadow);
+      background: var(--about-color-navy);
+      aspect-ratio: 1 / 1;
+    }
+
+    .phases-media__item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Content-only slider */
+    .about-phases__slider {
+      display: flex;
+      overflow-x: scroll;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      gap: 0;
+      border-radius: var(--about-radius);
+    }
+
+    .about-phases__slider::-webkit-scrollbar {
+      display: none;
+    }
+
+    .phase-slide {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    /* Color patch before phase label */
+    .phase-slide__phase-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .phase-slide__phase-meta::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 1.125rem;
+      border-radius: 2px;
+      flex-shrink: 0;
+      background: var(--about-color-blue, #5a8fa8);
+    }
+
+    /* Vary patch color per slide */
+    .phase-slide:nth-child(odd) .phase-slide__phase-meta::before {
+      background: var(--about-color-pink, #e0607e);
+    }
+
+    .phase-slide:nth-child(even) .phase-slide__phase-meta::before {
+      background: var(--about-color-blue, #5a8fa8);
+    }
+
+    .phase-slide__content {
+      padding: 0 0.25rem;
+    }
+
+    .phase-slide__label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--about-color-blue);
+      margin: 0;
+    }
+
+    .phase-slide__title {
+      font-size: 1.375rem;
+      font-weight: 700;
+      color: var(--about-color-navy);
+      margin: 0.375rem 0 0.625rem;
+    }
+
+    .phase-slide__desc {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--about-color-muted);
+      margin: 0;
+    }
+
+    /* Slider dots */
+    .about-phases__slider-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+    }
+
+    .slider-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--about-color-border);
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.25s;
+    }
+
+    .slider-dot.is-active {
+      background: var(--about-color-navy);
+      transform: scale(1.25);
+    }
+  }
+</style>
+
+<script>
+  (function () {
+    'use strict';
+
+    // ── Phase Accordion (desktop / tablet) ──────────────────────────────────
+    var accordion = document.getElementById('phases-accordion');
+    var mediaContainer = document.getElementById('phases-media');
+
+    if (accordion && mediaContainer) {
+      var items = accordion.querySelectorAll('.phase-item');
+      var mediaItems = mediaContainer.querySelectorAll('.phases-media__item');
+
+      function activatePhase(index) {
+        items.forEach(function (item, i) {
+          var isTarget = i === index;
+          var btn = item.querySelector('.phase-item__header');
+          var body = item.querySelector('.phase-item__body');
+
+          item.classList.toggle('is-active', isTarget);
+          btn.setAttribute('aria-expanded', isTarget ? 'true' : 'false');
+
+          if (isTarget) {
+            body.removeAttribute('hidden');
+          } else {
+            body.setAttribute('hidden', '');
+          }
+        });
+
+        mediaItems.forEach(function (mi, i) {
+          mi.classList.toggle('is-active', i === index);
+        });
+      }
+
+      items.forEach(function (item, index) {
+        var btn = item.querySelector('.phase-item__header');
+        btn.addEventListener('click', function () {
+          activatePhase(index);
+        });
+      });
+    }
+
+    // ── Mobile Slider ────────────────────────────────────────────────────────
+    var slider = document.getElementById('phases-slider');
+    var dotsContainer = document.getElementById('slider-dots');
+
+    if (slider && dotsContainer) {
+      var slides = slider.querySelectorAll('.phase-slide');
+      var dots = dotsContainer.querySelectorAll('.slider-dot');
+      // Reuse the same mediaItems reference for mobile image sync
+      var mobileMediaItems = mediaContainer
+        ? mediaContainer.querySelectorAll('.phases-media__item')
+        : [];
+      var currentSlide = 0;
+      var startX = 0;
+      var isDragging = false;
+
+      function goToSlide(index) {
+        if (index < 0) index = slides.length - 1;
+        if (index >= slides.length) index = 0;
+        currentSlide = index;
+
+        slider.scrollTo({ left: slider.offsetWidth * currentSlide, behavior: 'smooth' });
+
+        // Sync dots
+        dots.forEach(function (dot, i) {
+          dot.classList.toggle('is-active', i === currentSlide);
+        });
+
+        // Sync static image (mobile)
+        mobileMediaItems.forEach(function (mi, i) {
+          mi.classList.toggle('is-active', i === currentSlide);
+        });
+      }
+
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () {
+          goToSlide(i);
+        });
+      });
+
+      // Touch swipe
+      slider.addEventListener(
+        'touchstart',
+        function (e) {
+          startX = e.touches[0].clientX;
+          isDragging = true;
+        },
+        { passive: true }
+      );
+
+      slider.addEventListener(
+        'touchend',
+        function (e) {
+          if (!isDragging) return;
+          var diff = startX - e.changedTouches[0].clientX;
+          if (Math.abs(diff) > 50) {
+            goToSlide(diff > 0 ? currentSlide + 1 : currentSlide - 1);
+          }
+          isDragging = false;
+        },
+        { passive: true }
+      );
+
+      // Scroll-snap sync dots + image
+      slider.addEventListener(
+        'scroll',
+        function () {
+          var index = Math.round(slider.scrollLeft / slider.offsetWidth);
+          if (index !== currentSlide) {
+            currentSlide = index;
+
+            dots.forEach(function (dot, i) {
+              dot.classList.toggle('is-active', i === currentSlide);
+            });
+
+            mobileMediaItems.forEach(function (mi, i) {
+              mi.classList.toggle('is-active', i === currentSlide);
+            });
+          }
+        },
+        { passive: true }
+      );
+    }
+  })();
+</script>
