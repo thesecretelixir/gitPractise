@@ -397,17 +397,30 @@
   min-width: 24px;
 }
 
+/* Color patch — always-visible vertical bar between number and label */
 .phase-item__pipe {
-  color: #F46186;
-  font-weight: 700;
-  font-size: 3.1rem;
-  opacity: 0;
-  transition: opacity .2s;
+  display: inline-block;
+  width: 3px;
+  height: 1.375rem;
+  border-radius: 2px;
+  font-size: 0;           /* hide the | character */
+  flex-shrink: 0;
+  align-self: center;
+  opacity: 1;
+  transition: background .2s;
+  background: #F46186;    /* fallback; overridden per nth-child below */
 }
 
+/* Per-phase patch colours (inactive) */
+.phase-item:nth-child(1) .phase-item__pipe { background: #F46186; }  /* pink   */
+.phase-item:nth-child(2) .phase-item__pipe { background: #7B9ED9; }  /* blue   */
+.phase-item:nth-child(3) .phase-item__pipe { background: #9B8EC4; }  /* purple */
+.phase-item:nth-child(4) .phase-item__pipe { background: #7BC47F; }  /* green  */
+
+/* Active / hover: patch turns navy with the rest of the row */
 .phase-item.is-active .phase-item__pipe,
 .phase-item__header:hover .phase-item__pipe {
-  opacity: 1;
+  background: var(--about-color-navy);
 }
 
 .phase-item__label {
@@ -418,6 +431,14 @@
   min-width: 60px;
 }
 
+/* Dot separator between "Phase X" and the title */
+.phase-item__label::after {
+  content: ' •';
+  font-size: inherit;
+  font-weight: 600;
+  margin-left: .15em;
+}
+
 .phase-item__name {
   font-size: 20px;
   font-weight: 600;
@@ -426,9 +447,12 @@
   flex: 1;
 }
 
-.phase-item.is-active .phase-item__name   { color: var(--about-color-blue); font-size: 25px; }
-.phase-item.is-active .phase-item__number { color: var(--about-color-blue); font-size: 25px; }
-.phase-item.is-active .phase-item__label  { color: var(--about-color-blue); font-size: 25px; }
+.phase-item.is-active .phase-item__name,
+.phase-item__header:hover .phase-item__name   { color: var(--about-color-navy); font-size: 25px; font-weight: 700; }
+.phase-item.is-active .phase-item__number,
+.phase-item__header:hover .phase-item__number { color: var(--about-color-navy); font-size: 25px; font-weight: 700; }
+.phase-item.is-active .phase-item__label,
+.phase-item__header:hover .phase-item__label  { color: var(--about-color-navy); font-size: 25px; font-weight: 700; }
 
 .phase-item__body {
   padding: 0 0 1.25rem 1.5rem;
